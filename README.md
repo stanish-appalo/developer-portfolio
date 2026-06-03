@@ -1,10 +1,10 @@
 # Developer Portfolio — Stanish Appalo JA
 
-A clean, premium personal-brand site that showcases five web-development samples in one
-place. Built with **vanilla HTML, CSS, and JavaScript**.
+A modern, animated personal-brand site that showcases six web-development projects in one
+place — including a live, deployed SaaS. Built with **vanilla HTML, CSS, and JavaScript**.
 
 > This is the umbrella site to link from an Upwork profile or proposals — it ties together
-> the five project samples and presents skills and contact info.
+> the projects and presents skills and contact info.
 
 ## ✨ Features
 
