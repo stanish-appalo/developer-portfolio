@@ -15,6 +15,16 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👨‍💻</text></svg>" />
 </head>
 <body>
+  <!-- Animated aurora background -->
+  <div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Scroll progress bar -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
   <!-- Header -->
   <header class="site-header" id="header">
@@ -35,31 +45,61 @@
   <main id="top">
     <!-- Hero -->
     <section class="hero">
-      <div class="container">
-        <span class="status"><span class="pulse"></span> Available for freelance work</span>
-        <h1>I build <span class="accent">fast, modern</span> websites &amp; web apps.</h1>
-        <p class="hero-sub">
+      <div class="container hero-inner">
+        <span class="status reveal" data-reveal><span class="pulse"></span> Available for freelance work</span>
+        <h1 class="reveal" data-reveal data-reveal-delay="80">
+          I build
+          <span class="rotator-wrap"><span class="rotator" id="rotator">fast</span></span>
+          <br class="hero-br" />websites &amp; web apps.
+        </h1>
+        <p class="hero-sub reveal" data-reveal data-reveal-delay="160">
           I'm Stanish — a web &amp; software developer. I turn ideas into clean, responsive,
           conversion-focused sites and full-stack tools, using the right tech for the job.
         </p>
-        <div class="hero-actions">
-          <a href="#work" class="btn btn-primary btn-lg">View my work</a>
-          <a href="#contact" class="btn btn-outline btn-lg">Get in touch</a>
+        <div class="hero-actions reveal" data-reveal data-reveal-delay="240">
+          <a href="#work" class="btn btn-primary btn-lg btn-sheen">View my work</a>
+          <a href="#contact" class="btn btn-ghost btn-lg">Get in touch</a>
         </div>
-        <ul class="hero-tags">
-          <li>Responsive design</li>
-          <li>Landing pages</li>
-          <li>Business websites</li>
-          <li>REST APIs</li>
-          <li>Full-stack apps</li>
-        </ul>
+      </div>
+      <a href="#marquee" class="scroll-cue" aria-label="Scroll down"><span></span></a>
+    </section>
+
+    <!-- Skills marquee -->
+    <section class="marquee-section" id="marquee" aria-hidden="true">
+      <div class="marquee">
+        <div class="marquee-track">
+          <span>HTML5</span><span>•</span><span>CSS3</span><span>•</span><span>JavaScript</span><span>•</span><span>Responsive Design</span><span>•</span><span>Accessibility</span><span>•</span><span>FastAPI</span><span>•</span><span>Python</span><span>•</span><span>PostgreSQL</span><span>•</span><span>SQLAlchemy</span><span>•</span><span>REST APIs</span><span>•</span><span>Git &amp; GitHub</span><span>•</span><span>UI / UX</span><span>•</span>
+          <span>HTML5</span><span>•</span><span>CSS3</span><span>•</span><span>JavaScript</span><span>•</span><span>Responsive Design</span><span>•</span><span>Accessibility</span><span>•</span><span>FastAPI</span><span>•</span><span>Python</span><span>•</span><span>PostgreSQL</span><span>•</span><span>SQLAlchemy</span><span>•</span><span>REST APIs</span><span>•</span><span>Git &amp; GitHub</span><span>•</span><span>UI / UX</span><span>•</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+      <div class="container stats-grid">
+        <div class="stat reveal" data-reveal>
+          <div class="stat-num" data-count="5">0</div>
+          <div class="stat-label">Projects built</div>
+        </div>
+        <div class="stat reveal" data-reveal data-reveal-delay="80">
+          <div class="stat-num" data-count="2">0</div>
+          <div class="stat-label">Full-stack apps</div>
+        </div>
+        <div class="stat reveal" data-reveal data-reveal-delay="160">
+          <div class="stat-num" data-count="5">0</div>
+          <div class="stat-label">Languages supported</div>
+        </div>
+        <div class="stat reveal" data-reveal data-reveal-delay="240">
+          <div class="stat-num" data-count="100" data-suffix="%">0</div>
+          <div class="stat-label">Responsive</div>
+        </div>
       </div>
     </section>
 
     <!-- Work -->
     <section class="work" id="work">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal" data-reveal>
           <p class="eyebrow">Selected work</p>
           <h2>Five projects, five problems solved</h2>
           <p>Each sample targets a real client need — front-end polish, multi-page structure, backend APIs, redesigns, and internationalization.</p>
@@ -67,8 +107,7 @@
 
         <div class="project-grid">
 
-          <!-- 1 -->
-          <article class="project">
+          <article class="project reveal" data-reveal data-tilt>
             <div class="thumb thumb-1"><span>📡</span></div>
             <div class="project-body">
               <h3>Lead-Gen Landing Page</h3>
@@ -81,8 +120,7 @@
             </div>
           </article>
 
-          <!-- 2 -->
-          <article class="project">
+          <article class="project reveal" data-reveal data-reveal-delay="80" data-tilt>
             <div class="thumb thumb-2"><span>✨</span></div>
             <div class="project-body">
               <h3>Service-Business Website</h3>
@@ -95,8 +133,7 @@
             </div>
           </article>
 
-          <!-- 3 -->
-          <article class="project">
+          <article class="project reveal" data-reveal data-reveal-delay="160" data-tilt>
             <div class="thumb thumb-3"><span>🔗</span></div>
             <div class="project-body">
               <h3>URL Shortener API</h3>
@@ -109,8 +146,7 @@
             </div>
           </article>
 
-          <!-- 4 -->
-          <article class="project">
+          <article class="project reveal" data-reveal data-tilt>
             <div class="thumb thumb-4"><span>🔄</span></div>
             <div class="project-body">
               <h3>Redesign Case Study</h3>
@@ -123,8 +159,7 @@
             </div>
           </article>
 
-          <!-- 5 -->
-          <article class="project">
+          <article class="project reveal" data-reveal data-reveal-delay="80" data-tilt>
             <div class="thumb thumb-5"><span>✉️</span></div>
             <div class="project-body">
               <h3>Multilingual Contact Form</h3>
@@ -137,6 +172,14 @@
             </div>
           </article>
 
+          <article class="project project-cta reveal" data-reveal data-reveal-delay="160">
+            <div class="project-body cta-body">
+              <h3>Your project next?</h3>
+              <p>I'd love to build something for you — a site, an app, or a redesign.</p>
+              <a href="#contact" class="btn btn-primary btn-sm btn-sheen">Let's talk →</a>
+            </div>
+          </article>
+
         </div>
       </div>
     </section>
@@ -144,7 +187,7 @@
     <!-- About -->
     <section class="about" id="about">
       <div class="container about-grid">
-        <div class="about-copy">
+        <div class="about-copy reveal" data-reveal>
           <p class="eyebrow">About me</p>
           <h2>A developer who sweats the details.</h2>
           <p>I care about the things clients actually feel: pages that load fast, work on every
@@ -154,7 +197,7 @@
           <p>Whether you need a single landing page, a full business site, a redesign, or a
             custom tool, I'll build it properly and communicate clearly the whole way.</p>
         </div>
-        <div class="skills">
+        <div class="skills reveal" data-reveal data-reveal-delay="120">
           <h3>Skills &amp; tools</h3>
           <div class="skill-groups">
             <div class="skill-group">
@@ -177,12 +220,12 @@
     <!-- Contact -->
     <section class="contact" id="contact">
       <div class="container">
-        <div class="contact-card">
+        <div class="contact-card reveal" data-reveal>
           <p class="eyebrow light">Let's work together</p>
           <h2>Have a project in mind?</h2>
           <p>I'm available for freelance web &amp; software development. Tell me what you need and I'll get back to you quickly.</p>
           <!-- TODO: replace with your real contact email before publishing -->
-          <a href="mailto:your.email@example.com" class="btn btn-light btn-lg">📧 Email me</a>
+          <a href="mailto:your.email@example.com" class="btn btn-light btn-lg btn-sheen">📧 Email me</a>
           <div class="contact-links">
             <a href="https://github.com/stanish-appalo" target="_blank">GitHub</a>
             <span>·</span>
