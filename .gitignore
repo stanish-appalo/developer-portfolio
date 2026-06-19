@@ -3,3 +3,7 @@
 Thumbs.db
 .vscode/
 .idea/
+
+# local verification screenshots / scripts
+.shots/
+.cap/

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glass &amp; Aurora — Design Lab 04</title>
+<meta name="description" content="A serene, premium glassmorphism study — frosted glass panels floating over a living aurora. Design Lab 04 by Stanish Appalo JA." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --base: #0b1020;
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-bg-soft: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-border-strong: rgba(255, 255, 255, 0.28);
+    --text: rgba(244, 247, 255, 0.95);
+    --text-soft: rgba(220, 228, 245, 0.72);
+    --text-faint: rgba(206, 216, 240, 0.5);
+    --accent: #7c8bff;
+    --accent-2: #58e3d8;
+    --accent-3: #ff7ad9;
+    --shadow: 0 20px 60px rgba(4, 8, 24, 0.45);
+    --shadow-soft: 0 8px 30px rgba(4, 8, 24, 0.3);
+    --radius: 20px;
+    --radius-lg: 28px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--base);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0.01em;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  ::selection { background: rgba(124, 139, 255, 0.4); color: #fff; }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ============ AURORA BACKGROUND ============ */
+  .aurora {
+    position: fixed;
+    inset: -20vmax;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.7;
+    mix-blend-mode: screen;
+    will-change: transform;
+  }
+  .blob.b1 {
+    width: 55vmax; height: 55vmax;
+    background: radial-gradient(circle at 30% 30%, #4a5bff, transparent 65%);
+    top: -10%; left: -5%;
+    animation: drift1 26s ease-in-out infinite alternate;
+  }
+  .blob.b2 {
+    width: 48vmax; height: 48vmax;
+    background: radial-gradient(circle at 40% 40%, #1fd6c8, transparent 64%);
+    top: 20%; right: -10%;
+    animation: drift2 32s ease-in-out infinite alternate;
+  }
+  .blob.b3 {
+    width: 50vmax; height: 50vmax;
+    background: radial-gradient(circle at 50% 50%, #ff5fcf, transparent 66%);
+    bottom: -15%; left: 15%;
+    animation: drift3 29s ease-in-out infinite alternate;
+  }
+  .blob.b4 {
+    width: 40vmax; height: 40vmax;
+    background: radial-gradient(circle at 50% 50%, #ff9ad1, transparent 68%);
+    bottom: 5%; right: 8%;
+    animation: drift4 35s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift1 {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(8vmax, 6vmax) scale(1.15); }
+  }
+  @keyframes drift2 {
+    0%   { transform: translate(0,0) scale(1.05); }
+    100% { transform: translate(-7vmax, 5vmax) scale(0.9); }
+  }
+  @keyframes drift3 {
+    0%   { transform: translate(0,0) scale(0.95); }
+    100% { transform: translate(6vmax, -7vmax) scale(1.12); }
+  }
+  @keyframes drift4 {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-6vmax, -5vmax) scale(1.1); }
+  }
+
+  /* grain overlay */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* subtle top vignette to deepen base */
+  .vignette {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(120% 80% at 50% -10%, transparent 40%, rgba(6,9,22,0.55) 100%);
+  }
+
+  /* ============ GLASS PRIMITIVE ============ */
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+  }
+
+  /* ============ BACK-TO-LAB PILL ============ */
+  .lab-pill {
+    position: fixed;
+    top: 18px; left: 18px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    transition: transform 0.4s var(--ease), background 0.4s var(--ease), border-color 0.4s var(--ease);
+  }
+  .lab-pill:hover { transform: translateY(-2px); background: rgba(255,255,255,0.18); border-color: var(--glass-border-strong); }
+  .lab-pill .arrow { transition: transform 0.4s var(--ease); }
+  .lab-pill:hover .arrow { transform: translateX(-3px); }
+  .lab-pill .tag {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-left: 10px;
+    border-left: 1px solid var(--glass-border);
+  }
+  @media (max-width: 560px) {
+    .lab-pill .tag { display: none; }
+  }
+
+  /* ============ NAVBAR ============ */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    margin: 0 auto;
+    max-width: 1180px;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 14px 20px 0;
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+  }
+  .logo { display: flex; align-items: center; gap: 11px; font-weight: 700; font-size: 17px; }
+  .logo-mark {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-3));
+    box-shadow: 0 4px 16px rgba(124,139,255,0.5);
+    display: grid; place-items: center;
+  }
+  .logo-mark svg { width: 17px; height: 17px; }
+  .nav-links { display: flex; gap: 6px; align-items: center; }
+  .nav-links a {
+    font-size: 14px; font-weight: 500; color: var(--text-soft);
+    padding: 7px 14px; border-radius: 999px;
+    transition: color 0.3s, background 0.3s;
+  }
+  .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+  .nav-cta {
+    font-size: 14px; font-weight: 600;
+    padding: 9px 18px !important;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), #9aa6ff);
+    color: #0b1020 !important;
+    box-shadow: 0 6px 20px rgba(124,139,255,0.4);
+  }
+  .nav-cta:hover { background: linear-gradient(135deg, #9aa6ff, var(--accent)) !important; }
+  .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; }
+  .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 4px 0; border-radius: 2px; transition: 0.3s; }
+  @media (max-width: 760px) {
+    .nav-links { display: none; }
+    .nav-toggle { display: block; }
+  }
+
+  /* ============ LAYOUT ============ */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 84px 0; }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent-2);
+    padding: 7px 15px; border-radius: 999px;
+    background: rgba(88,227,216,0.1);
+    border: 1px solid rgba(88,227,216,0.22);
+    margin-bottom: 22px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 10px var(--accent-2); }
+
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 56px; }
+  .section-head h2 {
+    font-size: clamp(28px, 4.5vw, 44px);
+    font-weight: 700; line-height: 1.12; letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .section-head p { color: var(--text-soft); font-size: clamp(15px, 1.6vw, 17px); font-weight: 300; }
+
+  /* ============ HERO ============ */
+  .hero { padding-top: 70px; }
+  .hero-card {
+    position: relative;
+    max-width: 860px; margin: 0 auto;
+    text-align: center;
+    padding: clamp(40px, 6vw, 72px) clamp(24px, 5vw, 64px);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.1);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    will-change: transform;
+  }
+  .hero-card::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.14), transparent 40%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    position: relative;
+    font-size: clamp(34px, 7vw, 68px);
+    font-weight: 700; line-height: 1.04; letter-spacing: -0.03em;
+    margin-bottom: 22px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, var(--accent-2), var(--accent), var(--accent-3));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .hero p.lead {
+    position: relative;
+    max-width: 560px; margin: 0 auto 34px;
+    color: var(--text-soft); font-size: clamp(16px, 2vw, 19px); font-weight: 300;
+  }
+  .hero-btns { position: relative; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 15px; font-weight: 600;
+    padding: 14px 26px; border-radius: 999px;
+    cursor: pointer; border: 1px solid transparent;
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), background 0.4s var(--ease);
+  }
+  .btn:hover { transform: translateY(-3px); }
+  .btn-solid {
+    background: linear-gradient(135deg, var(--accent), #9aa6ff);
+    color: #0b1020;
+    box-shadow: 0 10px 30px rgba(124,139,255,0.45);
+  }
+  .btn-solid:hover { box-shadow: 0 14px 40px rgba(124,139,255,0.6); }
+  .btn-glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+    border: 1px solid var(--glass-border-strong);
+    color: var(--text);
+  }
+  .btn-glass:hover { background: rgba(255,255,255,0.2); }
+
+  .hero-meta {
+    margin-top: 40px; display: flex; gap: 28px; justify-content: center; flex-wrap: wrap;
+    color: var(--text-faint); font-size: 13px;
+  }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
+  .hero-meta svg { width: 15px; height: 15px; opacity: 0.8; }
+
+  /* ============ FEATURE CARDS ============ */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 22px;
+  }
+  .card {
+    position: relative;
+    padding: 32px 30px;
+    border-radius: var(--radius);
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: box-shadow 0.4s var(--ease), border-color 0.4s var(--ease);
+    will-change: transform;
+  }
+  .card .sheen {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,0.18), transparent 60%);
+    opacity: 0; transition: opacity 0.4s var(--ease);
+  }
+  .card:hover { border-color: var(--glass-border-strong); box-shadow: 0 26px 70px rgba(4,8,24,0.5); }
+  .card:hover .sheen { opacity: 1; }
+  .card-icon {
+    width: 52px; height: 52px; border-radius: 15px;
+    display: grid; place-items: center;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(124,139,255,0.3), rgba(255,122,217,0.25));
+    border: 1px solid var(--glass-border);
+    transform: translateZ(40px);
+  }
+  .card-icon svg { width: 26px; height: 26px; stroke: var(--text); }
+  .card h3 { font-size: 19px; font-weight: 600; margin-bottom: 10px; transform: translateZ(28px); }
+  .card p { color: var(--text-soft); font-size: 14.5px; font-weight: 300; transform: translateZ(18px); }
+
+  /* ============ STATS PANEL ============ */
+  .stats-panel {
+    padding: clamp(36px, 5vw, 56px);
+    border-radius: var(--radius-lg);
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+    text-align: center;
+  }
+  .stat .num {
+    font-size: clamp(32px, 5vw, 52px); font-weight: 800; line-height: 1; letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #fff, var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat .label { margin-top: 10px; color: var(--text-soft); font-size: 14px; font-weight: 300; }
+  .stat + .stat { position: relative; }
+  @media (max-width: 720px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px 24px; }
+  }
+
+  /* ============ PRICING ============ */
+  .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; align-items: stretch; }
+  .price {
+    position: relative;
+    padding: 36px 32px; border-radius: var(--radius);
+    background: var(--glass-bg-soft);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+    display: flex; flex-direction: column;
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease);
+  }
+  .price:hover { transform: translateY(-4px); border-color: var(--glass-border-strong); }
+  .price.featured {
+    background: rgba(124,139,255,0.14);
+    border-color: rgba(124,139,255,0.4);
+    box-shadow: 0 22px 60px rgba(124,139,255,0.28);
+  }
+  .price .badge {
+    position: absolute; top: -12px; right: 24px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-3)); color: #0b1020;
+  }
+  .price .tier { font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); }
+  .price .cost { margin: 14px 0 4px; font-size: clamp(34px, 5vw, 44px); font-weight: 800; letter-spacing: -0.02em; }
+  .price .cost span { font-size: 16px; font-weight: 400; color: var(--text-faint); }
+  .price .desc { color: var(--text-soft); font-size: 14px; font-weight: 300; margin-bottom: 22px; }
+  .price ul { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; flex: 1; }
+  .price li { display: flex; align-items: center; gap: 11px; font-size: 14.5px; color: var(--text-soft); font-weight: 300; }
+  .price li svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--accent-2); }
+  .price .btn { width: 100%; justify-content: center; }
+
+  /* ============ CTA ============ */
+  .cta-panel {
+    position: relative;
+    text-align: center;
+    padding: clamp(44px, 6vw, 80px) clamp(24px, 5vw, 56px);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.1);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .cta-panel::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(80% 120% at 50% 0%, rgba(124,139,255,0.22), transparent 60%);
+    pointer-events: none;
+  }
+  .cta-panel h2 {
+    position: relative;
+    font-size: clamp(28px, 5vw, 48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 18px;
+  }
+  .cta-panel p { position: relative; color: var(--text-soft); font-size: clamp(15px, 2vw, 18px); font-weight: 300; max-width: 500px; margin: 0 auto 30px; }
+  .cta-panel .hero-btns { position: relative; }
+
+  /* ============ FOOTER ============ */
+  footer {
+    text-align: center;
+    padding: 50px 20px 60px;
+    color: var(--text-faint);
+    font-size: 13px;
+    font-weight: 300;
+  }
+  footer .fl { color: var(--text-soft); }
+  footer a { color: var(--accent-2); }
+
+  /* ============ REVEAL ============ */
+  .reveal { opacity: 0; transform: translateY(36px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .blob { animation: none !important; }
+    .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+    .hero-card, .card { transform: none !important; }
+    * { animation-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- AURORA -->
+<div class="aurora" id="aurora" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- BACK TO LAB -->
+<a class="lab-pill" href="../index.html#lab" aria-label="Back to Design Lab">
+  <span class="arrow">←</span>
+  <span>Back to Lab</span>
+  <span class="tag">Design Lab · 04 — Glass &amp; Aurora</span>
+</a>
+
+<!-- NAV -->
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <a class="logo" href="#top" aria-label="Lumen home">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5L12 2z" fill="#0b1020"/></svg>
+      </span>
+      Lumen
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#stats">Results</a>
+      <a href="#pricing">Pricing</a>
+      <a href="../index.html#contact" class="nav-cta">Get in touch</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero wrap" id="top">
+  <div class="hero-card reveal" id="heroCard">
+    <span class="eyebrow"><span class="dot"></span> Frosted, calm, intentional</span>
+    <h1>Interfaces that feel like<br><span class="grad">light through glass</span></h1>
+    <p class="lead">Lumen is a design system for serene products — translucent surfaces, living color, and motion that breathes. Built to feel premium without ever raising its voice.</p>
+    <div class="hero-btns">
+      <a class="btn btn-solid" href="#features">Explore the system</a>
+      <a class="btn btn-glass" href="#pricing">View plans</a>
+    </div>
+    <div class="hero-meta">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> No design debt</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Ships in days</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg> Accessible by default</span>
+    </div>
+  </div>
+</header>
+
+<!-- FEATURES -->
+<section id="features" class="wrap">
+  <div class="section-head reveal">
+    <span class="eyebrow"><span class="dot"></span> The toolkit</span>
+    <h2>Everything you need to build calm</h2>
+    <p>Each surface is composed from the same translucent material — so depth, focus, and hierarchy emerge naturally instead of being forced.</p>
+  </div>
+  <div class="feature-grid">
+    <article class="card reveal" data-tilt>
+      <div class="sheen"></div>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <h3>Layered glass surfaces</h3>
+      <p>Stackable frosted panels with consistent blur, saturation, and border tokens. Depth without heaviness, on any background.</p>
+    </article>
+    <article class="card reveal" data-tilt>
+      <div class="sheen"></div>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+      </div>
+      <h3>Living aurora engine</h3>
+      <p>Soft drifting color fields that respond to the cursor with gentle parallax — atmosphere that stays subtle, never distracting.</p>
+    </article>
+    <article class="card reveal" data-tilt>
+      <div class="sheen"></div>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+      </div>
+      <h3>Motion that breathes</h3>
+      <p>Every transition is eased and reduced-motion aware. Hover sheen, 3D tilt, and scroll reveals tuned to feel effortless.</p>
+    </article>
+    <article class="card reveal" data-tilt>
+      <div class="sheen"></div>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+      </div>
+      <h3>Typographic clarity</h3>
+      <p>Plus Jakarta Sans with airy spacing and a soft light palette — readable over any aurora, in light or dark contexts.</p>
+    </article>
+    <article class="card reveal" data-tilt>
+      <div class="sheen"></div>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+      </div>
+      <h3>Responsive by design</h3>
+      <p>Fluid type and adaptive grids from 360px to 4K. Glass adapts to context so layouts never feel cramped or empty.</p>
+    </article>
+    <article class="card reveal" data-tilt>
+      <div class="sheen"></div>
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      </div>
+      <h3>Performance minded</h3>
+      <p>GPU-friendly blur, will-change hints, and rAF-throttled parallax keep things smooth even on modest devices.</p>
+    </article>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats" class="wrap">
+  <div class="stats-panel glass reveal">
+    <div class="stats-grid">
+      <div class="stat"><div class="num" data-count="60">0</div><div class="label">FPS animation target</div></div>
+      <div class="stat"><div class="num" data-count="98" data-suffix="%">0</div><div class="label">Lighthouse a11y score</div></div>
+      <div class="stat"><div class="num" data-count="12" data-suffix="+">0</div><div class="label">Composable components</div></div>
+      <div class="stat"><div class="num" data-count="0" data-suffix=" kb">0</div><div class="label">Image assets shipped</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="wrap">
+  <div class="section-head reveal">
+    <span class="eyebrow"><span class="dot"></span> Simple pricing</span>
+    <h2>Start serene, scale gracefully</h2>
+    <p>One material, three ways to ship it. Every plan includes the full glass toolkit, aurora engine, and lifetime updates.</p>
+  </div>
+  <div class="price-grid">
+    <div class="price reveal">
+      <span class="tier">Starter</span>
+      <div class="cost">₹0<span> / forever</span></div>
+      <p class="desc">For personal projects and weekend experiments.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Core glass primitives</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Aurora background preset</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Community support</li>
+      </ul>
+      <a class="btn btn-glass" href="../index.html#contact">Get started</a>
+    </div>
+    <div class="price featured reveal">
+      <span class="badge">Most loved</span>
+      <span class="tier">Studio</span>
+      <div class="cost">₹1,999<span> / month</span></div>
+      <p class="desc">For teams shipping polished products at pace.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Everything in Starter</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 12+ composable components</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Tilt &amp; sheen interactions</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
+      </ul>
+      <a class="btn btn-solid" href="../index.html#contact">Choose Studio</a>
+    </div>
+    <div class="price reveal">
+      <span class="tier">Atelier</span>
+      <div class="cost">Custom</div>
+      <p class="desc">For agencies and brands with bespoke needs.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Everything in Studio</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Custom aurora palettes</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Design system audit</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Dedicated partner</li>
+      </ul>
+      <a class="btn btn-glass" href="../index.html#contact">Talk to us</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="wrap">
+  <div class="cta-panel reveal">
+    <h2>Let's build something that feels calm.</h2>
+    <p>Have a product that deserves a serene, premium interface? I'd love to design it with you.</p>
+    <div class="hero-btns">
+      <a class="btn btn-solid" href="../index.html#contact">Start a project</a>
+      <a class="btn btn-glass" href="../index.html#lab">See more demos</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fl">Glass &amp; Aurora — Design Lab 04</div>
+  <div>Crafted by Stanish Appalo JA · <a href="../index.html#lab">Back to the Lab</a></div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- Mobile nav toggle (links collapse to CTA on small screens; toggle scrolls to features) ---- */
+  var toggle = document.getElementById("navToggle");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var target = document.getElementById("features");
+      if (target) target.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+    });
+  }
+
+  /* ---- Aurora parallax on mouse move (rAF-throttled) ---- */
+  var aurora = document.getElementById("aurora");
+  var heroCard = document.getElementById("heroCard");
+  var px = 0, py = 0, tx = 0, ty = 0, rafId = null;
+
+  function onMove(e) {
+    if (reduce) return;
+    var w = window.innerWidth || 1, h = window.innerHeight || 1;
+    tx = (e.clientX / w - 0.5);
+    ty = (e.clientY / h - 0.5);
+    if (!rafId) rafId = requestAnimationFrame(applyParallax);
+  }
+  function applyParallax() {
+    rafId = null;
+    px += (tx - px) * 0.08;
+    py += (ty - py) * 0.08;
+    if (aurora) aurora.style.transform = "translate(" + (px * 40) + "px," + (py * 40) + "px)";
+    if (Math.abs(tx - px) > 0.001 || Math.abs(ty - py) > 0.001) {
+      rafId = requestAnimationFrame(applyParallax);
+    }
+  }
+  if (!reduce) window.addEventListener("mousemove", onMove, { passive: true });
+
+  /* ---- Hero gentle float ---- */
+  if (heroCard && !reduce) {
+    var t0 = performance.now();
+    (function floatHero(now) {
+      var t = (now - t0) / 1000;
+      var y = Math.sin(t * 0.7) * 7;
+      heroCard.style.transform = "translateY(" + y + "px)";
+      requestAnimationFrame(floatHero);
+    })(t0);
+  }
+
+  /* ---- 3D tilt + sheen on feature cards (pointer-based) ---- */
+  var tiltCards = document.querySelectorAll("[data-tilt]");
+  tiltCards.forEach(function (card) {
+    if (reduce) return;
+    card.addEventListener("mousemove", function (e) {
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width;
+      var y = (e.clientY - r.top) / r.height;
+      var rx = (0.5 - y) * 10;
+      var ry = (x - 0.5) * 12;
+      card.style.transform = "perspective(900px) rotateX(" + rx + "deg) rotateY(" + ry + "deg) translateY(-4px)";
+      card.style.setProperty("--mx", (x * 100) + "%");
+      card.style.setProperty("--my", (y * 100) + "%");
+    });
+    card.addEventListener("mouseleave", function () {
+      card.style.transform = "";
+    });
+  });
+
+  /* ---- Scroll reveal ---- */
+  var reveals = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window && !reduce) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry, i) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          // stagger siblings slightly
+          var delay = 0;
+          var parent = el.parentElement;
+          if (parent) {
+            var sibs = Array.prototype.slice.call(parent.querySelectorAll(".reveal"));
+            delay = Math.min(sibs.indexOf(el), 5) * 80;
+          }
+          setTimeout(function () { el.classList.add("in"); }, delay);
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    reveals.forEach(function (el) { io.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add("in"); });
+  }
+
+  /* ---- Animated stat counters ---- */
+  var stats = document.querySelectorAll(".num[data-count]");
+  function animateCount(el) {
+    var target = parseFloat(el.getAttribute("data-count")) || 0;
+    var suffix = el.getAttribute("data-suffix") || "";
+    if (reduce || target === 0) { el.textContent = target + suffix; return; }
+    var dur = 1400, start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+  if ("IntersectionObserver" in window) {
+    var sio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { animateCount(entry.target); sio.unobserve(entry.target); }
+      });
+    }, { threshold: 0.5 });
+    stats.forEach(function (el) { sio.observe(el); });
+  } else {
+    stats.forEach(function (el) {
+      el.textContent = (el.getAttribute("data-count") || "0") + (el.getAttribute("data-suffix") || "");
+    });
+  }
+
+  /* ---- Optional GSAP enhancement (guarded; page works fully without it) ---- */
+  if (window.gsap && window.ScrollTrigger && !reduce) {
+    try {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.utils.toArray(".card").forEach(function (c) {
+        gsap.fromTo(c, { y: 12 }, {
+          y: -12,
+          ease: "none",
+          scrollTrigger: { trigger: c, start: "top bottom", end: "bottom top", scrub: true }
+        });
+      });
+    } catch (err) { /* GSAP enhancement is optional; ignore */ }
+  }
+})();
+</script>
+</body>
+</html>

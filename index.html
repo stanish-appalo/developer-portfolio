@@ -3,196 +3,343 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stanish Appalo JA — Web &amp; Software Developer</title>
-  <meta name="description" content="Freelance web & software developer. I build fast, modern, responsive websites and web apps — from landing pages and business sites to REST APIs and full-stack tools." />
+  <title>Stanish Appalo JA — I build websites &amp; web apps.</title>
+  <meta name="description" content="Stanish Appalo JA — freelance web & software developer. I build fast, clean, modern websites and full-stack web apps: landing pages, business sites, SaaS, REST APIs, PWAs, and automation with n8n." />
   <meta property="og:title" content="Stanish Appalo JA — Web & Software Developer" />
-  <meta property="og:description" content="Fast, modern, responsive websites and web apps." />
+  <meta property="og:description" content="I build fast, clean, modern websites and web apps — and small tools & automations too." />
   <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#ECE7DE" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👨‍💻</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>" />
 </head>
 <body>
-  <!-- Animated aurora background -->
-  <div class="aurora" aria-hidden="true">
-    <span class="blob b1"></span>
-    <span class="blob b2"></span>
-    <span class="blob b3"></span>
-    <div class="grid-overlay"></div>
-  </div>
+  <!-- Grain + paper texture overlay -->
+  <div class="paper-grain" aria-hidden="true"></div>
 
-  <!-- Scroll progress bar -->
+  <!-- Custom cursor (pointer devices only; built by JS) -->
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <!-- Scroll progress -->
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
   <!-- Header -->
   <header class="site-header" id="header">
     <div class="container nav">
-      <a href="#top" class="logo">Stanish<span class="dot">.</span></a>
+      <a href="#top" class="logo" data-cursor>Stanish<span class="dot">.</span></a>
       <nav class="nav-links" id="navLinks">
-        <a href="#work">Work</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <a href="#work" data-cursor>Work</a>
+        <a href="#lab" data-cursor>Lab</a>
+        <a href="#about" data-cursor>About</a>
+        <a href="#process" data-cursor>Process</a>
+        <a href="#faq" data-cursor>FAQ</a>
+        <a href="#contact" data-cursor>Contact</a>
       </nav>
       <div class="nav-right">
-        <a href="#contact" class="btn btn-primary btn-sm">Hire me</a>
+        <a href="#contact" class="btn btn-dark btn-sm" data-cursor data-magnetic>Let's talk</a>
         <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
   </header>
 
   <main id="top">
-    <!-- Hero -->
+
+    <!-- ===================== HERO ===================== -->
     <section class="hero">
-      <div class="container hero-inner">
+      <div class="container">
         <span class="status reveal" data-reveal><span class="pulse"></span> Available for freelance work</span>
-        <h1 class="reveal" data-reveal data-reveal-delay="80">
-          I build
-          <span class="rotator-wrap"><span class="rotator" id="rotator">fast</span></span>
-          <br class="hero-br" />websites &amp; web apps.
+        <h1 class="hero-title reveal" data-reveal data-reveal-delay="60">
+          Since you landed here,<br />
+          you probably want someone to build your
+          <span class="hl">website</span><span class="amp"> &amp; </span><span class="hl">web&nbsp;app.</span>
         </h1>
         <p class="hero-sub reveal" data-reveal data-reveal-delay="160">
-          I'm Stanish — a web &amp; software developer. I turn ideas into clean, responsive,
-          conversion-focused sites and full-stack tools, using the right tech for the job.
+          Good news — that's literally my favourite thing to do. I'm <strong>Stanish</strong>, a web
+          &amp; software developer who turns rough ideas into clean, fast, responsive things people
+          actually enjoy using. Front of the stack, back of the stack, or a little automation glue
+          in between.
         </p>
         <div class="hero-actions reveal" data-reveal data-reveal-delay="240">
-          <a href="#work" class="btn btn-primary btn-lg btn-sheen">View my work</a>
-          <a href="#contact" class="btn btn-ghost btn-lg">Get in touch</a>
+          <a href="#work" class="btn btn-dark btn-lg" data-cursor data-magnetic>See the work ↓</a>
+          <a href="#contact" class="btn btn-outline btn-lg" data-cursor data-magnetic>Start a project</a>
         </div>
       </div>
-      <a href="#marquee" class="scroll-cue" aria-label="Scroll down"><span></span></a>
+      <a href="#work" class="scroll-cue" aria-label="Scroll to work" data-cursor><span>scroll</span><i></i></a>
     </section>
 
-    <!-- Skills marquee -->
-    <section class="marquee-section" id="marquee" aria-hidden="true">
+    <!-- ===================== MARQUEE ===================== -->
+    <section class="marquee-section" aria-hidden="true">
       <div class="marquee">
         <div class="marquee-track">
-          <span>HTML5</span><span>•</span><span>CSS3</span><span>•</span><span>JavaScript</span><span>•</span><span>Responsive Design</span><span>•</span><span>Accessibility</span><span>•</span><span>Node.js</span><span>•</span><span>Express</span><span>•</span><span>FastAPI</span><span>•</span><span>Python</span><span>•</span><span>PostgreSQL</span><span>•</span><span>SQLAlchemy</span><span>•</span><span>REST APIs</span><span>•</span><span>Git &amp; GitHub</span><span>•</span><span>UI / UX</span><span>•</span>
-          <span>HTML5</span><span>•</span><span>CSS3</span><span>•</span><span>JavaScript</span><span>•</span><span>Responsive Design</span><span>•</span><span>Accessibility</span><span>•</span><span>Node.js</span><span>•</span><span>Express</span><span>•</span><span>FastAPI</span><span>•</span><span>Python</span><span>•</span><span>PostgreSQL</span><span>•</span><span>SQLAlchemy</span><span>•</span><span>REST APIs</span><span>•</span><span>Git &amp; GitHub</span><span>•</span><span>UI / UX</span><span>•</span>
+          <span>Websites</span><b>✶</b><span>Web apps</span><b>✶</b><span>Landing pages</span><b>✶</b><span>REST APIs</span><b>✶</b><span>SaaS</span><b>✶</b><span>Redesigns</span><b>✶</b><span>Automation</span><b>✶</b><span>Clean code</span><b>✶</b>
+          <span>Websites</span><b>✶</b><span>Web apps</span><b>✶</b><span>Landing pages</span><b>✶</b><span>REST APIs</span><b>✶</b><span>SaaS</span><b>✶</b><span>Redesigns</span><b>✶</b><span>Automation</span><b>✶</b><span>Clean code</span><b>✶</b>
         </div>
       </div>
     </section>
 
-    <!-- Stats -->
+    <!-- ===================== STATS ===================== -->
     <section class="stats">
       <div class="container stats-grid">
         <div class="stat reveal" data-reveal>
-          <div class="stat-num" data-count="6">0</div>
-          <div class="stat-label">Projects built</div>
+          <div class="stat-num" data-count="12">0</div>
+          <div class="stat-label">Projects shipped</div>
         </div>
         <div class="stat reveal" data-reveal data-reveal-delay="80">
-          <div class="stat-num" data-count="3">0</div>
-          <div class="stat-label">Full-stack apps</div>
+          <div class="stat-num" data-count="9">0</div>
+          <div class="stat-label">Live on the web</div>
         </div>
         <div class="stat reveal" data-reveal data-reveal-delay="160">
-          <div class="stat-num" data-count="5">0</div>
-          <div class="stat-label">Languages supported</div>
+          <div class="stat-num" data-count="7">0</div>
+          <div class="stat-label">Languages I build in</div>
         </div>
         <div class="stat reveal" data-reveal data-reveal-delay="240">
           <div class="stat-num" data-count="100" data-suffix="%">0</div>
-          <div class="stat-label">Responsive</div>
+          <div class="stat-label">Responsive, always</div>
         </div>
       </div>
     </section>
 
-    <!-- Work -->
+    <!-- ===================== WORK ===================== -->
     <section class="work" id="work">
       <div class="container">
         <div class="section-head reveal" data-reveal>
-          <p class="eyebrow">Selected work</p>
-          <h2>Six projects, real problems solved</h2>
-          <p>From a live, deployed SaaS to front-end polish, multi-page sites, backend APIs, redesigns, and internationalization — each one targets a real client need.</p>
+          <p class="eyebrow">01 — Selected work</p>
+          <h2>A few things I'm<br /> genuinely proud of.</h2>
+          <p>Real projects, real problems. Most are live — go on, poke them. The screenshots below
+            are pulled from the actual deployed sites, so what you see is what's running right now.</p>
         </div>
 
-        <div class="project-grid">
+        <!-- Featured projects: big alternating rows with live screenshots -->
+        <div class="featured">
 
-          <article class="project project-live reveal" data-reveal data-tilt>
-            <div class="thumb thumb-6">
-              <span class="live-badge"><span class="ld-dot"></span>Live</span>
-              <span>📈</span>
-            </div>
-            <div class="project-body">
+          <article class="feat reveal" data-reveal>
+            <a class="feat-shot" href="https://uptime-monitor-s5c9.onrender.com" target="_blank" rel="noopener" data-cursor data-cursor-text="Launch ↗">
+              <span class="shot-fallback" data-fallback>📈<small>Uptime Monitor</small></span>
+              <img loading="lazy" data-shot src="assets/shots/uptime.jpg" alt="Screenshot of the Uptime Monitor login / dashboard" />
+              <span class="live-badge"><i></i>Live</span>
+            </a>
+            <div class="feat-meta">
+              <div class="feat-index"><span>01</span><span class="feat-year">2026</span></div>
               <h3>Uptime Monitor</h3>
-              <p>A deployed full-stack SaaS that checks your websites on a schedule, opens an incident when one goes down, and shows a live dashboard plus a shareable public status page — with teams &amp; roles.</p>
-              <ul class="tags"><li>Node.js</li><li>Express</li><li>PostgreSQL</li><li>SaaS</li></ul>
-              <div class="project-links">
-                <a href="https://uptime-monitor-s5c9.onrender.com" target="_blank" class="link-live">Live demo →</a>
-                <a href="https://github.com/stanish-appalo/uptime-monitor" target="_blank" class="link-code">Code</a>
+              <p>A deployed full-stack SaaS that pings your sites on a schedule, opens an incident
+                when one falls over, and shows a live dashboard plus a shareable public status page —
+                with teams &amp; roles baked in.</p>
+              <ul class="role"><li>Node.js</li><li>Express</li><li>PostgreSQL</li><li>SaaS</li></ul>
+              <div class="feat-links">
+                <a href="https://uptime-monitor-s5c9.onrender.com" target="_blank" rel="noopener" class="link-arrow" data-cursor>Launch website ↗</a>
+                <a href="https://github.com/stanish-appalo/uptime-monitor" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
               </div>
             </div>
           </article>
 
-          <article class="project reveal" data-reveal data-reveal-delay="80" data-tilt>
-            <div class="thumb thumb-1"><span>📡</span></div>
-            <div class="project-body">
-              <h3>Lead-Gen Landing Page</h3>
-              <p>A dark, electric-tech landing page with a validated, consent-aware lead-capture form and smooth two-button CTA logic.</p>
-              <ul class="tags"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>Responsive</li></ul>
-              <div class="project-links">
-                <a href="https://stanish-appalo.github.io/lead-gen-landing-page/" target="_blank" class="link-live">Live demo →</a>
-                <a href="https://github.com/stanish-appalo/lead-gen-landing-page" target="_blank" class="link-code">Code</a>
+          <article class="feat feat-rev reveal" data-reveal>
+            <a class="feat-shot" href="https://stanish-appalo.github.io/norml/studio/" target="_blank" rel="noopener" data-cursor data-cursor-text="Launch ↗">
+              <span class="shot-fallback" data-fallback>🗿<small>norml. studio</small></span>
+              <img loading="lazy" data-shot src="assets/shots/norml-studio.jpg" alt="Screenshot of the norml. studio 3D WebGL site" />
+              <span class="live-badge"><i></i>Live</span>
+            </a>
+            <div class="feat-meta">
+              <div class="feat-index"><span>02</span><span class="feat-year">2026</span></div>
+              <h3>norml. Studio — 3D</h3>
+              <p>A cinematic, fully 3D studio site: a real-time WebGL hero, a marble sculpture you can
+                spin and shatter, a scroll-into-screen video moment, smooth Lenis scrolling and
+                GSAP-scrubbed storytelling. My most technically ambitious front-end yet.</p>
+              <ul class="role"><li>Three.js / WebGL</li><li>GSAP</li><li>Lenis</li><li>Shaders</li></ul>
+              <div class="feat-links">
+                <a href="https://stanish-appalo.github.io/norml/studio/" target="_blank" rel="noopener" class="link-arrow" data-cursor>Launch website ↗</a>
+                <a href="https://github.com/stanish-appalo/norml" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
               </div>
             </div>
           </article>
 
-          <article class="project reveal" data-reveal data-reveal-delay="160" data-tilt>
-            <div class="thumb thumb-2"><span>✨</span></div>
-            <div class="project-body">
-              <h3>Service-Business Website</h3>
-              <p>A premium 5-page site (cleaning &amp; restoration) with a warm editorial design, card layouts, accessible accordions, and a quote form.</p>
-              <ul class="tags"><li>Multi-page</li><li>Responsive</li><li>Accessibility</li><li>UX</li></ul>
-              <div class="project-links">
-                <a href="https://stanish-appalo.github.io/service-business-website/" target="_blank" class="link-live">Live demo →</a>
-                <a href="https://github.com/stanish-appalo/service-business-website" target="_blank" class="link-code">Code</a>
+          <article class="feat reveal" data-reveal>
+            <a class="feat-shot" href="https://demowebsite-stanishtech.vercel.app" target="_blank" rel="noopener" data-cursor data-cursor-text="Launch ↗">
+              <span class="shot-fallback" data-fallback>⚡<small>StanishTech</small></span>
+              <img loading="lazy" data-shot src="assets/shots/stanishtech.jpg" alt="Screenshot of the StanishTech studio landing page" />
+              <span class="live-badge"><i></i>Live</span>
+            </a>
+            <div class="feat-meta">
+              <div class="feat-index"><span>03</span><span class="feat-year">2026</span></div>
+              <h3>StanishTech Studio</h3>
+              <p>A modern, statically-rendered marketing site for a software studio — built on the
+                newest stack with smooth scroll-reveal animations, an animated mobile menu, and a
+                component-driven, single-config codebase.</p>
+              <ul class="role"><li>Next.js 16</li><li>React 19</li><li>TypeScript</li><li>Tailwind v4</li></ul>
+              <div class="feat-links">
+                <a href="https://demowebsite-stanishtech.vercel.app" target="_blank" rel="noopener" class="link-arrow" data-cursor>Launch website ↗</a>
+                <a href="https://github.com/stanish-appalo/demowebsite-stanishtech" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
               </div>
             </div>
           </article>
 
-          <article class="project reveal" data-reveal data-tilt>
-            <div class="thumb thumb-3"><span>🔗</span></div>
-            <div class="project-body">
-              <h3>URL Shortener API</h3>
-              <p>A production-shaped REST API with auto-generated Swagger docs, click tracking, and a SQLite↔Postgres database layer.</p>
-              <ul class="tags"><li>FastAPI</li><li>Python</li><li>PostgreSQL</li><li>REST</li></ul>
-              <div class="project-links">
-                <a href="https://url-shortener-api-zdul.onrender.com" target="_blank" class="link-live">Live demo →</a>
-                <a href="https://github.com/stanish-appalo/url-shortener-api" target="_blank" class="link-code">Code</a>
+          <article class="feat feat-rev reveal" data-reveal>
+            <a class="feat-shot" href="https://stanish-appalo.github.io/gymtrack/" target="_blank" rel="noopener" data-cursor data-cursor-text="Launch ↗">
+              <span class="shot-fallback" data-fallback>🏋️<small>GymTrack</small></span>
+              <img loading="lazy" data-shot src="assets/shots/gymtrack.jpg" alt="Screenshot of the GymTrack workout tracker app" />
+              <span class="live-badge"><i></i>Live</span>
+            </a>
+            <div class="feat-meta">
+              <div class="feat-index"><span>04</span><span class="feat-year">2026</span></div>
+              <h3>GymTrack</h3>
+              <p>An offline-first workout + nutrition + progress tracker. No accounts, no build step —
+                everything saves on your device. Interactive muscle map, a 70+ exercise library with
+                demo photos, protein/calorie targets, charts, and CSV export. Installable as a phone app.</p>
+              <ul class="role"><li>PWA</li><li>Offline-first</li><li>Vanilla JS</li><li>Charts</li></ul>
+              <div class="feat-links">
+                <a href="https://stanish-appalo.github.io/gymtrack/" target="_blank" rel="noopener" class="link-arrow" data-cursor>Launch website ↗</a>
+                <a href="https://github.com/stanish-appalo/gymtrack" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
               </div>
             </div>
           </article>
 
-          <article class="project reveal" data-reveal data-reveal-delay="80" data-tilt>
-            <div class="thumb thumb-4"><span>🔄</span></div>
-            <div class="project-body">
-              <h3>Redesign Case Study</h3>
-              <p>A before/after redesign with an interactive toggle — turning a dated 2009 page into a modern, responsive experience.</p>
-              <ul class="tags"><li>Redesign</li><li>CSS</li><li>UX</li><li>Before/After</li></ul>
-              <div class="project-links">
-                <a href="https://stanish-appalo.github.io/redesign-case-study/" target="_blank" class="link-live">Live demo →</a>
-                <a href="https://github.com/stanish-appalo/redesign-case-study" target="_blank" class="link-code">Code</a>
+        </div>
+
+        <!-- More work: grid of compact cards -->
+        <div class="more-head reveal" data-reveal>
+          <h3>More from the workshop</h3>
+          <p>Front-end polish, backend APIs, full-stack tools, and a confidential client build.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <article class="card reveal" data-reveal>
+            <a class="card-shot" href="https://stanish-appalo.github.io/norml/" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+              <span class="shot-fallback" data-fallback>🥭</span>
+              <img loading="lazy" data-shot src="assets/shots/norml.jpg" alt="norml. agency site screenshot" />
+            </a>
+            <div class="card-body">
+              <div class="card-top"><h4>norml. — Agency Site</h4><span class="card-year">2026</span></div>
+              <p>The social-first agency brand: a scroll-told pitch deck plus a full multi-page site shipped in two complete themes (neon dark &amp; minimal light).</p>
+              <ul class="role sm"><li>GSAP</li><li>Scrollytelling</li><li>Dual-theme</li></ul>
+              <div class="card-links">
+                <a href="https://stanish-appalo.github.io/norml/" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>Live ↗</a>
+                <a href="https://github.com/stanish-appalo/norml" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
               </div>
             </div>
           </article>
 
-          <article class="project reveal" data-reveal data-reveal-delay="160" data-tilt>
-            <div class="thumb thumb-5"><span>✉️</span></div>
-            <div class="project-body">
-              <h3>Multilingual Contact Form</h3>
-              <p>A full-stack contact form in 5 languages (including right-to-left Arabic) with localized validation and a FastAPI backend.</p>
-              <ul class="tags"><li>FastAPI</li><li>i18n</li><li>RTL</li><li>Full-stack</li></ul>
-              <div class="project-links">
-                <a href="https://stanish-appalo.github.io/multilingual-contact-form/" target="_blank" class="link-live">Live demo →</a>
-                <a href="https://github.com/stanish-appalo/multilingual-contact-form" target="_blank" class="link-code">Code</a>
+          <article class="card reveal" data-reveal>
+            <a class="card-shot" href="https://stanish-appalo.github.io/service-business-website/" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+              <span class="shot-fallback" data-fallback>✨</span>
+              <img loading="lazy" data-shot src="assets/shots/service.jpg" alt="Service-business website screenshot" />
+            </a>
+            <div class="card-body">
+              <div class="card-top"><h4>Service-Business Website</h4><span class="card-year">2026</span></div>
+              <p>A warm, editorial 5-page site (cleaning &amp; restoration) with card layouts, accessible accordions, and a quote form.</p>
+              <ul class="role sm"><li>Multi-page</li><li>A11y</li><li>UX</li></ul>
+              <div class="card-links">
+                <a href="https://stanish-appalo.github.io/service-business-website/" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>Live ↗</a>
+                <a href="https://github.com/stanish-appalo/service-business-website" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
               </div>
             </div>
           </article>
 
-          <article class="project project-cta reveal" data-reveal>
-            <div class="project-body cta-body">
-              <h3>Your project next?</h3>
-              <p>I'd love to build something for you — a site, an app, or a redesign.</p>
-              <a href="#contact" class="btn btn-primary btn-sm btn-sheen">Let's talk →</a>
+          <article class="card reveal" data-reveal data-reveal-delay="80">
+            <a class="card-shot" href="https://stanish-appalo.github.io/lead-gen-landing-page/" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+              <span class="shot-fallback" data-fallback>📡</span>
+              <img loading="lazy" data-shot src="assets/shots/leadgen.jpg" alt="Lead-gen landing page screenshot" />
+            </a>
+            <div class="card-body">
+              <div class="card-top"><h4>Lead-Gen Landing Page</h4><span class="card-year">2026</span></div>
+              <p>A conversion-focused landing page with a validated, consent-aware lead-capture form and tidy two-CTA logic.</p>
+              <ul class="role sm"><li>HTML</li><li>CSS</li><li>JS</li></ul>
+              <div class="card-links">
+                <a href="https://stanish-appalo.github.io/lead-gen-landing-page/" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>Live ↗</a>
+                <a href="https://github.com/stanish-appalo/lead-gen-landing-page" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card reveal" data-reveal data-reveal-delay="160">
+            <a class="card-shot" href="https://stanish-appalo.github.io/redesign-case-study/" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+              <span class="shot-fallback" data-fallback>🔄</span>
+              <img loading="lazy" data-shot src="assets/shots/redesign.jpg" alt="Redesign case study screenshot" />
+            </a>
+            <div class="card-body">
+              <div class="card-top"><h4>Redesign Case Study</h4><span class="card-year">2026</span></div>
+              <p>A before/after redesign with an interactive toggle — a dated 2009 page turned into a modern, responsive experience.</p>
+              <ul class="role sm"><li>Redesign</li><li>CSS</li><li>UX</li></ul>
+              <div class="card-links">
+                <a href="https://stanish-appalo.github.io/redesign-case-study/" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>Live ↗</a>
+                <a href="https://github.com/stanish-appalo/redesign-case-study" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card reveal" data-reveal>
+            <a class="card-shot" href="https://stanish-appalo.github.io/multilingual-contact-form/" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+              <span class="shot-fallback" data-fallback>✉️</span>
+              <img loading="lazy" data-shot src="assets/shots/multilingual.jpg" alt="Multilingual contact form screenshot" />
+            </a>
+            <div class="card-body">
+              <div class="card-top"><h4>Multilingual Contact Form</h4><span class="card-year">2026</span></div>
+              <p>A full-stack contact form in 5 languages (incl. right-to-left Arabic) with localized validation and a FastAPI backend.</p>
+              <ul class="role sm"><li>FastAPI</li><li>i18n</li><li>RTL</li></ul>
+              <div class="card-links">
+                <a href="https://stanish-appalo.github.io/multilingual-contact-form/" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>Live ↗</a>
+                <a href="https://github.com/stanish-appalo/multilingual-contact-form" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card reveal" data-reveal data-reveal-delay="80">
+            <a class="card-shot" href="https://url-shortener-api-zdul.onrender.com" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+              <span class="shot-fallback" data-fallback>🔗</span>
+              <img loading="lazy" data-shot src="assets/shots/urlshortener.jpg" alt="URL shortener API screenshot" />
+            </a>
+            <div class="card-body">
+              <div class="card-top"><h4>URL Shortener API</h4><span class="card-year">2026</span></div>
+              <p>A production-shaped REST API with auto-generated Swagger docs, click tracking, and a SQLite↔Postgres data layer.</p>
+              <ul class="role sm"><li>FastAPI</li><li>Python</li><li>REST</li></ul>
+              <div class="card-links">
+                <a href="https://url-shortener-api-zdul.onrender.com" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>Live ↗</a>
+                <a href="https://github.com/stanish-appalo/url-shortener-api" target="_blank" rel="noopener" class="link-muted" data-cursor>Code</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card-code reveal" data-reveal data-reveal-delay="160">
+            <span class="card-shot no-live">
+              <span class="shot-fallback static">📦</span>
+            </span>
+            <div class="card-body">
+              <div class="card-top"><h4>Inventory Management</h4><span class="card-year">2026</span></div>
+              <p>A full-stack inventory system — products, categories, suppliers and stock movements — with auth and a RESTful API.</p>
+              <ul class="role sm"><li>Spring Boot</li><li>React</li><li>TypeScript</li></ul>
+              <div class="card-links">
+                <a href="https://github.com/stanish-appalo/Inventory-management-project" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>View code ↗</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card-code reveal" data-reveal>
+            <span class="card-shot no-live">
+              <span class="shot-fallback static">💬</span>
+            </span>
+            <div class="card-body">
+              <div class="card-top"><h4>Real-Time Chat App</h4><span class="card-year">2026</span></div>
+              <p>A real-time chat application over WebSockets, with an extensible hook for AI-assisted replies.</p>
+              <ul class="role sm"><li>Spring Boot</li><li>WebSocket</li><li>Java</li></ul>
+              <div class="card-links">
+                <a href="https://github.com/stanish-appalo/ai-chat-application" target="_blank" rel="noopener" class="link-arrow sm" data-cursor>View code ↗</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card-code card-private reveal" data-reveal data-reveal-delay="80">
+            <span class="card-shot no-live">
+              <span class="shot-fallback static">🧾</span>
+              <span class="private-badge">Client · NDA</span>
+            </span>
+            <div class="card-body">
+              <div class="card-top"><h4>Acheron Billing App</h4><span class="card-year">2026</span></div>
+              <p>A desktop pharmacy billing system delivered to a real client — GST billing, inventory, batch tracking, printable iText invoices, a packaged installer and a licensing system. Code &amp; data are confidential.</p>
+              <ul class="role sm"><li>Java Swing</li><li>JDBC</li><li>SQLite</li><li>iText PDF</li></ul>
+              <div class="card-links">
+                <span class="link-muted no-link">Private client project</span>
+              </div>
             </div>
           </article>
 
@@ -200,55 +347,209 @@
       </div>
     </section>
 
-    <!-- About -->
+    <!-- ===================== SHOWREEL / SCROLL-INTO-TV ===================== -->
+    <section class="tv" id="showreel">
+      <div class="tv__pin">
+        <div class="tv__lead" data-tv-lead>
+          <p class="eyebrow" style="justify-content:center">02 — Showreel</p>
+          <h2>Roll the&nbsp;tape.</h2>
+          <p class="tv__hint">Keep scrolling to climb inside <span aria-hidden="true">↓</span></p>
+        </div>
+
+        <div class="tv__set" data-cursor data-cursor-text="Go in ↓">
+          <div class="tv__screen">
+            <canvas class="tv__canvas" id="tvCanvas" aria-hidden="true"></canvas>
+            <!-- drop a clip at assets/video/reel.mp4 and it takes over automatically -->
+            <video class="tv__video" data-src="assets/video/reel.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <div class="tv__scan" aria-hidden="true"></div>
+            <div class="tv__glow" aria-hidden="true"></div>
+            <!-- HD reveal that takes over as you zoom in -->
+            <div class="tv__swap" aria-hidden="true">
+              <span class="tv__swap-grid"></span>
+              <div class="tv__swap-copy">
+                <span class="eyebrow" style="color:#ff7a45;justify-content:center">Now entering</span>
+                <h3>The Design Lab</h3>
+                <p>Six wildly different sites. One developer. <span class="tv__down">↓</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="tv__bezel" aria-hidden="true"><span class="tv__brand">STANISH·VISION</span><span class="tv__led"></span></div>
+        </div>
+
+        <p class="tv__cap" data-tv-lead>Not just clean &amp; correct — I can make it <span class="ital">move.</span></p>
+      </div>
+    </section>
+
+    <!-- ===================== DESIGN LAB ===================== -->
+    <section class="lab" id="lab">
+      <div class="container">
+        <div class="section-head reveal" data-reveal>
+          <p class="eyebrow">03 — Design Lab</p>
+          <h2>How far can I<br /> actually push it?</h2>
+          <p>Each tile is a full, standalone page in a completely different visual language — built to
+            show range, not restraint. Open one and play. (Best on desktop, sound up, motion on.)</p>
+        </div>
+
+        <div class="lab-grid">
+          <a class="lab-card lab-3d reveal" data-reveal href="demos/3d-pitch.html" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+            <div class="lab-thumb"><span class="lab-orb"></span><span class="lab-orb lab-orb2"></span></div>
+            <div class="lab-meta"><span class="lab-no">01</span><h3>Spatial 3D Pitch</h3><p>WebGL hero, scroll-scrubbed story, an interactive sculpture you can fling.</p><span class="lab-tags">Three.js · GSAP · Lenis</span></div>
+            <span class="lab-go">Open demo ↗</span>
+          </a>
+
+          <a class="lab-card lab-robot reveal" data-reveal data-reveal-delay="80" href="demos/interactive-3d.html" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+            <div class="lab-thumb"><span class="lab-bot"></span></div>
+            <div class="lab-meta"><span class="lab-no">02</span><h3>Interactive 3D</h3><p>A real-time 3D android that tracks your cursor in a moody, premium scene.</p><span class="lab-tags">Three.js · R3F vibes</span></div>
+            <span class="lab-go">Open demo ↗</span>
+          </a>
+
+          <a class="lab-card lab-brutal reveal" data-reveal data-reveal-delay="160" href="demos/neobrutalism.html" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+            <div class="lab-thumb lab-thumb-brutal"><span>NEW!</span><b>★</b></div>
+            <div class="lab-meta"><span class="lab-no">03</span><h3>Neo-Brutalist</h3><p>Loud type, hard shadows, clashing color, zero chill. On purpose.</p><span class="lab-tags">CSS · Bold</span></div>
+            <span class="lab-go">Open demo ↗</span>
+          </a>
+
+          <a class="lab-card lab-glass reveal" data-reveal href="demos/glassmorphism.html" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+            <div class="lab-thumb lab-thumb-glass"><span class="glass-pane"></span><span class="glass-pane g2"></span></div>
+            <div class="lab-meta"><span class="lab-no">04</span><h3>Glass &amp; Aurora</h3><p>Frosted panels floating over a living aurora gradient. Soft, modern, calm.</p><span class="lab-tags">Glassmorphism</span></div>
+            <span class="lab-go">Open demo ↗</span>
+          </a>
+
+          <a class="lab-card lab-cyber reveal" data-reveal data-reveal-delay="80" href="demos/cyberpunk.html" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+            <div class="lab-thumb lab-thumb-cyber"><span class="cyber-line"></span></div>
+            <div class="lab-meta"><span class="lab-no">05</span><h3>Cyber-Terminal</h3><p>Neon, glitch, a typing terminal and matrix rain. Hacker-movie energy.</p><span class="lab-tags">Canvas · Glitch</span></div>
+            <span class="lab-go">Open demo ↗</span>
+          </a>
+
+          <a class="lab-card lab-kinetic reveal" data-reveal data-reveal-delay="160" href="demos/kinetic.html" target="_blank" rel="noopener" data-cursor data-cursor-text="Open ↗">
+            <div class="lab-thumb lab-thumb-kinetic"><b>TYPE</b><b>TYPE</b><b>TYPE</b></div>
+            <div class="lab-meta"><span class="lab-no">06</span><h3>Kinetic Type</h3><p>Editorial, awwwards-style motion where the typography is the whole show.</p><span class="lab-tags">GSAP · Editorial</span></div>
+            <span class="lab-go">Open demo ↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ABOUT ===================== -->
     <section class="about" id="about">
       <div class="container about-grid">
         <div class="about-copy reveal" data-reveal>
-          <p class="eyebrow">About me</p>
-          <h2>A developer who sweats the details.</h2>
-          <p>I care about the things clients actually feel: pages that load fast, work on every
-            screen, read clearly, and guide visitors toward taking action. I write clean,
-            well-commented code — and I'm just as comfortable on the front end as I am wiring up
-            an API and a database on the back end.</p>
-          <p>Whether you need a single landing page, a full business site, a redesign, or a
-            custom tool, I'll build it properly and communicate clearly the whole way.</p>
+          <p class="eyebrow">04 — About</p>
+          <h2>A developer who actually sweats the details.</h2>
+          <p>I care about the stuff clients <em>feel</em>: pages that load fast, work on every screen,
+            read clearly, and quietly nudge visitors toward doing the thing. I write clean,
+            well-commented code, and I'm just as happy on the front end as I am wiring up an API,
+            a database, or a background job on the back end.</p>
+          <p>Beyond websites, I build small tools and apps, and I automate the boring bits with
+            <strong>n8n</strong> and friends — so the repetitive work runs itself while you get on
+            with the actual business.</p>
+          <p>Single landing page, full business site, SaaS, redesign, custom tool, or a workflow that
+            saves you an hour a day — I'll build it properly and keep you in the loop the whole way.</p>
         </div>
-        <div class="skills reveal" data-reveal data-reveal-delay="120">
-          <h3>Skills &amp; tools</h3>
+        <div class="about-side reveal" data-reveal data-reveal-delay="120">
+          <h3>What I work with</h3>
           <div class="skill-groups">
             <div class="skill-group">
-              <h4>Front-end</h4>
-              <ul><li>HTML5</li><li>CSS3</li><li>JavaScript</li><li>Responsive design</li><li>Accessibility</li></ul>
+              <h4>Languages</h4>
+              <ul class="role sm"><li>Java</li><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>HTML5</li><li>CSS3</li><li>SQL</li></ul>
             </div>
             <div class="skill-group">
               <h4>Back-end</h4>
-              <ul><li>Node.js</li><li>Express</li><li>Python</li><li>FastAPI</li><li>REST APIs</li><li>SQL / PostgreSQL</li></ul>
+              <ul class="role sm"><li>Spring Boot</li><li>FastAPI</li><li>Node.js</li><li>Express</li><li>WebSockets</li><li>REST APIs</li><li>Swagger / OpenAPI</li></ul>
             </div>
             <div class="skill-group">
-              <h4>Workflow</h4>
-              <ul><li>Git &amp; GitHub</li><li>Deployment (Render)</li><li>Neon Postgres</li><li>Clean code</li></ul>
+              <h4>Front-end</h4>
+              <ul class="role sm"><li>React</li><li>React Router</li><li>Next.js</li><li>Tailwind CSS</li><li>Bootstrap</li><li>Responsive</li><li>Accessibility</li></ul>
+            </div>
+            <div class="skill-group">
+              <h4>Data, tools &amp; automation</h4>
+              <ul class="role sm"><li>PostgreSQL</li><li>SQLite</li><li>SQLAlchemy</li><li>JDBC</li><li>Git &amp; GitHub</li><li>Postman</li><li>Maven / Gradle</li><li>n8n automation</li><li>Render / Vercel</li></ul>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Contact -->
+    <!-- ===================== PROCESS ===================== -->
+    <section class="process" id="process">
+      <div class="container">
+        <div class="section-head reveal" data-reveal>
+          <p class="eyebrow">05 — How I work</p>
+          <h2>Six steps, zero drama.</h2>
+        </div>
+        <ol class="steps">
+          <li class="step reveal" data-reveal><span class="step-num">01</span><h4>Listen</h4><p>You tell me the problem and who it's for. I ask the annoying questions now so there are no surprises later.</p></li>
+          <li class="step reveal" data-reveal data-reveal-delay="60"><span class="step-num">02</span><h4>Plan</h4><p>Scope, stack, and a clear plan. You'll know what you're getting, roughly when, and for how much.</p></li>
+          <li class="step reveal" data-reveal data-reveal-delay="120"><span class="step-num">03</span><h4>Design</h4><p>A clean, on-brand layout that puts your message and your users first — not my ego.</p></li>
+          <li class="step reveal" data-reveal data-reveal-delay="180"><span class="step-num">04</span><h4>Build</h4><p>Clean, responsive, well-commented code. Fast pages, real accessibility, no mystery spaghetti.</p></li>
+          <li class="step reveal" data-reveal data-reveal-delay="240"><span class="step-num">05</span><h4>Ship</h4><p>Deployed and live on Render, Vercel, or wherever fits — with the boring config handled.</p></li>
+          <li class="step reveal" data-reveal data-reveal-delay="300"><span class="step-num">06</span><h4>Support</h4><p>Tweaks, fixes, and automations after launch. I don't vanish the moment the invoice clears.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===================== FAQ ===================== -->
+    <section class="faq" id="faq">
+      <div class="container">
+        <div class="section-head reveal" data-reveal>
+          <p class="eyebrow">06 — FAQ</p>
+          <h2>The questions I usually get.</h2>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item reveal" data-reveal>
+            <summary data-cursor>Are you actually available for work? <span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Yes — that little green dot at the top isn't decoration. I take on freelance web &amp; software projects, big and small.</p>
+          </details>
+          <details class="faq-item reveal" data-reveal data-reveal-delay="60">
+            <summary data-cursor>What kind of projects do you take on? <span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Landing pages, multi-page business sites, full-stack web apps, REST APIs, SaaS, redesigns, PWAs, and automations. If it lives on the web (or talks to it), I can probably build it.</p>
+          </details>
+          <details class="faq-item reveal" data-reveal data-reveal-delay="120">
+            <summary data-cursor>Do you really do automation and n8n? <span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>I do. If you've got a repetitive task — moving data between tools, sending alerts, syncing sheets — I can wire it up with n8n (or code) so it just runs itself. I also build small custom apps and tools for one-off needs.</p>
+          </details>
+          <details class="faq-item reveal" data-reveal data-reveal-delay="180">
+            <summary data-cursor>Will my site work on phones? <span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Every single time. Responsive isn't an add-on, it's the baseline. Same goes for accessibility and fast load times.</p>
+          </details>
+          <details class="faq-item reveal" data-reveal data-reveal-delay="240">
+            <summary data-cursor>How do we start? <span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>Email me a few sentences about what you need. I'll reply quickly with questions, a rough plan, and a price. No pressure, no jargon.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT ===================== -->
     <section class="contact" id="contact">
       <div class="container">
-        <div class="contact-card reveal" data-reveal>
-          <p class="eyebrow light">Let's work together</p>
-          <h2>Have a project in mind?</h2>
-          <p>I'm available for freelance web &amp; software development. Tell me what you need and I'll get back to you quickly.</p>
-          <a href="mailto:stanishappaloja@gmail.com" class="btn btn-light btn-lg btn-sheen">📧 Email me</a>
+        <div class="contact-inner reveal" data-reveal>
+          <p class="eyebrow">07 — Contact</p>
+          <h2 class="contact-title">Got something<br />you want built?</h2>
+          <p class="contact-sub">Tell me what you're after — a site, an app, a redesign, or an automation that
+            saves you time. I reply fast and I don't bite.</p>
+          <a href="mailto:stanishappaloja@gmail.com" class="btn btn-dark btn-xl" data-cursor data-magnetic>✉ Email me</a>
           <div class="contact-links">
-            <a href="mailto:stanishappaloja@gmail.com">stanishappaloja@gmail.com</a>
+            <a href="mailto:stanishappaloja@gmail.com" data-cursor>stanishappaloja@gmail.com</a>
             <span>·</span>
-            <a href="https://github.com/stanish-appalo" target="_blank">GitHub</a>
+            <a href="https://github.com/stanish-appalo" target="_blank" rel="noopener" data-cursor>GitHub</a>
             <span>·</span>
-            <a href="#top">Back to top</a>
+            <a href="https://www.linkedin.com/in/stanishappalo/" target="_blank" rel="noopener" data-cursor>LinkedIn</a>
+            <span>·</span>
+            <a href="#top" data-cursor>Back to top ↑</a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ===================== 3D EASTER EGG ===================== -->
+    <section class="egg" aria-label="A little 3D robot">
+      <canvas id="eggCanvas" class="egg__canvas" aria-hidden="true"></canvas>
+      <div class="egg__copy">
+        <p class="eyebrow">P.S. —</p>
+        <h2>Say hi to <span class="ital">Pixel.</span></h2>
+        <p>My pet robot. <strong>Drag</strong> to spin him, <strong>tap</strong> for a hello. He doesn't do
+          much — he's just here because I couldn't resist one last bit of 3D.</p>
       </div>
     </section>
   </main>
@@ -256,10 +557,15 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <span class="logo">Stanish<span class="dot">.</span></span>
-      <p>&copy; <span id="year"></span> Stanish Appalo JA — Web &amp; Software Developer.</p>
+      <p>&copy; <span id="year"></span> Stanish Appalo JA — built from scratch, by hand.</p>
+      <a href="#top" class="footer-top" data-cursor>↑ Top</a>
     </div>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="main.js"></script>
+  <script src="lab.js"></script>
 </body>
 </html>

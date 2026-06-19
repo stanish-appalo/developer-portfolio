@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LOUDER™ — Design That Refuses To Be Ignored · Design Lab 03</title>
+<meta name="description" content="Neo-Brutalist demo page. Thick borders, hard shadows, clashing colors, and zero apologies." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0c0c0c;
+    --paper: #f4f1e9;
+    --white: #ffffff;
+    --yellow: #ffe600;
+    --pink: #ff4da6;
+    --cyan: #2ad4ff;
+    --lime: #c2ff3d;
+    --orange: #ff7a1a;
+    --shadow: 8px 8px 0 var(--ink);
+    --shadow-sm: 4px 4px 0 var(--ink);
+    --shadow-lg: 14px 14px 0 var(--ink);
+    --border: 4px solid var(--ink);
+    --border-thick: 5px solid var(--ink);
+    --snap: cubic-bezier(0.2, 1.6, 0.4, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+    line-height: 1.2;
+    -webkit-font-smoothing: antialiased;
+    /* faint grid texture so the "raw paper" reads even on flat color */
+    background-image:
+      linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .display {
+    font-family: "Archivo Black", "Space Grotesk", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+
+  .mono {
+    font-family: "Space Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ============ FIXED CONTROLS ============ */
+  .lab-back {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    background: var(--lime);
+    color: var(--ink);
+    border: var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 10px 14px;
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: transform 0.12s var(--snap), box-shadow 0.12s ease, background 0.12s ease;
+  }
+  .lab-back:hover, .lab-back:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+    background: var(--yellow);
+    outline: none;
+  }
+  .lab-back:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+
+  .lab-tag {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    background: var(--ink);
+    color: var(--yellow);
+    border: var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 10px 14px;
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    max-width: 60vw;
+    text-align: right;
+  }
+  @media (max-width: 720px) {
+    .lab-tag { font-size: 9.5px; padding: 7px 9px; max-width: 52vw; }
+    .lab-back { font-size: 11px; padding: 7px 10px; }
+  }
+
+  /* ============ CURSOR BLOB ============ */
+  #blob {
+    position: fixed;
+    top: 0; left: 0;
+    width: 46px; height: 46px;
+    background: var(--pink);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: multiply;
+    display: none;
+    will-change: transform;
+  }
+  @media (pointer: fine) {
+    #blob { display: block; }
+  }
+
+  /* ============ LAYOUT ============ */
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+  section { position: relative; }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 120px 0 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-eyebrow {
+    display: inline-block;
+    background: var(--cyan);
+    border: var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 8px 14px;
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: clamp(11px, 2vw, 14px);
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 13vw, 11rem);
+    margin: 0 0 8px;
+    max-width: 14ch;
+  }
+  .hero h1 .stroke {
+    color: var(--paper);
+    -webkit-text-stroke: 3px var(--ink);
+    text-stroke: 3px var(--ink);
+  }
+  .hero h1 .hl {
+    background: var(--yellow);
+    box-shadow: var(--shadow-sm);
+    border: var(--border);
+    padding: 0 0.12em;
+    display: inline-block;
+    transform: rotate(-1.5deg);
+  }
+  .hero-sub {
+    font-size: clamp(1.05rem, 2.4vw, 1.6rem);
+    font-weight: 600;
+    max-width: 34ch;
+    margin: 32px 0 36px;
+    line-height: 1.35;
+  }
+  .hero-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: "Archivo Black", sans-serif;
+    text-transform: uppercase;
+    border: var(--border-thick);
+    box-shadow: var(--shadow);
+    padding: 18px 30px;
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    cursor: pointer;
+    transition: transform 0.12s var(--snap), box-shadow 0.12s ease;
+    display: inline-block;
+    letter-spacing: 0.01em;
+  }
+  .btn:hover, .btn:focus-visible {
+    transform: translate(-4px, -4px);
+    box-shadow: var(--shadow-lg);
+    outline: none;
+  }
+  .btn:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--ink); }
+  .btn-pink { background: var(--pink); color: var(--ink); }
+  .btn-white { background: var(--white); color: var(--ink); }
+  .btn-ink { background: var(--ink); color: var(--yellow); }
+
+  /* sticker badges in hero */
+  .sticker {
+    position: absolute;
+    font-family: "Archivo Black", sans-serif;
+    text-transform: uppercase;
+    border: var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 16px;
+    text-align: center;
+    line-height: 1;
+    z-index: 5;
+    user-select: none;
+  }
+  .sticker .big { display: block; font-size: clamp(1.4rem, 3vw, 2.4rem); }
+  .sticker .small { font-family: "Space Mono", monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; }
+
+  .sticker-1 {
+    background: var(--lime);
+    top: 80px; right: 4%;
+    transform: rotate(9deg);
+    border-radius: 50%;
+    width: 130px; height: 130px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .sticker-2 {
+    background: var(--cyan);
+    bottom: 40px; right: 14%;
+    transform: rotate(-7deg);
+  }
+  @media (max-width: 920px) {
+    .sticker-1 { width: 96px; height: 96px; top: 84px; right: 2%; }
+    .sticker-2 { display: none; }
+  }
+
+  /* draggable sticker */
+  #drag-sticker {
+    position: fixed;
+    top: 140px;
+    left: 60%;
+    z-index: 800;
+    background: var(--orange);
+    border: var(--border-thick);
+    box-shadow: var(--shadow);
+    padding: 14px 18px;
+    font-family: "Archivo Black", sans-serif;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    transform: rotate(6deg);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    line-height: 1;
+    text-align: center;
+  }
+  #drag-sticker .hint { display: block; font-family: "Space Mono", monospace; font-size: 0.55rem; font-weight: 700; margin-top: 6px; letter-spacing: 0.08em; }
+  #drag-sticker.grabbing { cursor: grabbing; box-shadow: var(--shadow-lg); }
+  @media (max-width: 720px) { #drag-sticker { display: none; } }
+
+  /* ============ MARQUEE ============ */
+  .marquee {
+    border-top: var(--border-thick);
+    border-bottom: var(--border-thick);
+    background: var(--ink);
+    color: var(--paper);
+    overflow: hidden;
+    padding: 16px 0;
+    white-space: nowrap;
+  }
+  .marquee-track {
+    display: inline-flex;
+    will-change: transform;
+    animation: scroll-x 22s linear infinite;
+  }
+  .marquee.alt { background: var(--pink); color: var(--ink); }
+  .marquee.alt .marquee-track { animation-duration: 28s; animation-direction: reverse; }
+  .marquee-track span {
+    font-family: "Archivo Black", sans-serif;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 4vw, 2.6rem);
+    padding: 0 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .marquee-track .dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--yellow);
+    border: 3px solid currentColor;
+    display: inline-block;
+  }
+  .marquee.alt .marquee-track .dot { background: var(--ink); }
+  @keyframes scroll-x { to { transform: translateX(-50%); } }
+
+  /* ============ FEATURES ============ */
+  .features { padding: 100px 0; }
+  .section-head { margin-bottom: 56px; max-width: 18ch; }
+  .section-head .kicker {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--lime);
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 6px 12px;
+    margin-bottom: 18px;
+    letter-spacing: 0.08em;
+  }
+  .section-head h2 {
+    font-size: clamp(2.2rem, 7vw, 5rem);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+  }
+  .card {
+    border: var(--border-thick);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    transition: transform 0.14s var(--snap), box-shadow 0.14s ease;
+    position: relative;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover, .card:focus-within {
+    transform: translate(-6px, -6px);
+    box-shadow: var(--shadow-lg);
+  }
+  .card .num {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 16px;
+    letter-spacing: 0.08em;
+  }
+  .card h3 {
+    font-family: "Archivo Black", sans-serif;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 3vw, 2.1rem);
+    margin-bottom: 14px;
+    line-height: 0.98;
+  }
+  .card p { font-weight: 500; font-size: 1.02rem; line-height: 1.4; }
+  .card .icon {
+    font-size: 2.6rem;
+    margin-bottom: auto;
+    align-self: flex-end;
+    line-height: 1;
+  }
+
+  .c-yellow { background: var(--yellow); }
+  .c-pink { background: var(--pink); }
+  .c-cyan { background: var(--cyan); }
+  .c-lime { background: var(--lime); }
+  .c-white { background: var(--white); }
+  .c-ink { background: var(--ink); color: var(--paper); }
+  .c-ink .num { color: var(--cyan); }
+
+  /* sizing across 12-col grid for "chaotic but organized" rhythm */
+  .span-7 { grid-column: span 7; }
+  .span-5 { grid-column: span 5; }
+  .span-4 { grid-column: span 4; }
+  .span-6 { grid-column: span 6; }
+  .span-8 { grid-column: span 8; }
+
+  @media (max-width: 920px) {
+    .span-7, .span-5, .span-4, .span-6, .span-8 { grid-column: span 6; }
+  }
+  @media (max-width: 600px) {
+    .span-7, .span-5, .span-4, .span-6, .span-8 { grid-column: span 12; }
+    .card { padding: 24px; min-height: auto; }
+  }
+
+  /* ============ TESTIMONIALS ============ */
+  .testi { padding: 100px 0 120px; background: var(--cyan); border-top: var(--border-thick); border-bottom: var(--border-thick); }
+  .notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 36px;
+    justify-content: center;
+    margin-top: 56px;
+  }
+  .note {
+    width: 290px;
+    border: var(--border);
+    box-shadow: var(--shadow);
+    padding: 26px 24px 22px;
+    position: relative;
+    transition: transform 0.16s var(--snap), box-shadow 0.16s ease;
+  }
+  .note:nth-child(1) { background: var(--yellow); transform: rotate(-4deg); }
+  .note:nth-child(2) { background: var(--white); transform: rotate(3deg); }
+  .note:nth-child(3) { background: var(--lime); transform: rotate(-2.5deg); }
+  .note:nth-child(4) { background: var(--pink); transform: rotate(4.5deg); }
+  .note:hover { transform: rotate(0deg) scale(1.04); box-shadow: var(--shadow-lg); z-index: 3; }
+  /* tape element */
+  .note::before {
+    content: "";
+    position: absolute;
+    top: -14px; left: 50%;
+    width: 90px; height: 28px;
+    background: rgba(255,255,255,0.55);
+    border: 2px solid rgba(0,0,0,0.35);
+    transform: translateX(-50%) rotate(-3deg);
+    backdrop-filter: blur(1px);
+  }
+  .note p { font-weight: 600; font-size: 1.05rem; line-height: 1.4; margin-bottom: 18px; }
+  .note .who { font-family: "Space Mono", monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; }
+  .note .stars { font-family: "Space Mono", monospace; font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+
+  /* ============ FOOTER CTA ============ */
+  .footer-cta {
+    background: var(--yellow);
+    padding: 110px 0;
+    text-align: center;
+    border-bottom: var(--border-thick);
+    position: relative;
+    overflow: hidden;
+  }
+  .footer-cta h2 {
+    font-size: clamp(2.6rem, 10vw, 8rem);
+    margin-bottom: 28px;
+  }
+  .footer-cta h2 .spin { display: inline-block; }
+  .footer-cta p { font-weight: 600; font-size: clamp(1rem, 2.5vw, 1.4rem); max-width: 30ch; margin: 0 auto 40px; line-height: 1.4; }
+
+  .site-foot {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px 0;
+  }
+  .site-foot .wrap {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .site-foot .brand { font-family: "Archivo Black", sans-serif; font-size: 1.4rem; color: var(--yellow); text-transform: uppercase; }
+
+  /* ============ SCROLL REVEAL ============ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: transform 0.5s var(--snap), opacity 0.4s ease;
+  }
+
+  .wiggle { animation: wiggle 2.6s ease-in-out infinite; transform-origin: center; }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(9deg); }
+    25% { transform: rotate(15deg); }
+    75% { transform: rotate(3deg); }
+  }
+
+  /* ============ REDUCED MOTION ============ */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .marquee-track { animation: none; transform: translateX(0); }
+    .wiggle { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    #blob { display: none !important; }
+    .footer-cta h2 .spin { animation: none !important; }
+    * { transition-duration: 0.001s !important; }
+  }
+</style>
+</head>
+<body>
+
+<a href="../index.html#lab" class="lab-back">&larr; Back to Lab</a>
+<div class="lab-tag mono">DESIGN LAB · 03 — NEO-BRUTALIST</div>
+
+<div id="blob" aria-hidden="true"></div>
+
+<div id="drag-sticker" aria-hidden="true" title="Drag me around">
+  DRAG ME
+  <span class="hint">no really, grab it</span>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <span class="hero-eyebrow mono">⚡ A LOUD LITTLE PRODUCT FROM THE DESIGN LAB</span>
+    <h1 class="display">
+      Design that <span class="hl">refuses</span> to be ignored.
+    </h1>
+    <p class="hero-sub">
+      Meet LOUDER™ — the design system for people who think "subtle" is just another word for "forgotten." Big borders. Hard shadows. Zero apologies.
+    </p>
+    <div class="hero-cta-row">
+      <a href="#footer" class="btn btn-pink">Get Loud →</a>
+      <a href="#features" class="btn btn-white">See The Goods</a>
+    </div>
+
+    <div class="sticker sticker-1 wiggle" aria-hidden="true">
+      <span class="big">100%</span>
+      <span class="small">NO BEIGE</span>
+    </div>
+    <div class="sticker sticker-2" aria-hidden="true">
+      <span class="big">NEW!</span>
+      <span class="small">BATTERIES NOT INCLUDED</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>BOLD <i class="dot"></i> LOUD <i class="dot"></i> UNAPOLOGETIC <i class="dot"></i> CHUNKY <i class="dot"></i> BOLD <i class="dot"></i> LOUD <i class="dot"></i> UNAPOLOGETIC <i class="dot"></i> CHUNKY <i class="dot"></i></span>
+    <span>BOLD <i class="dot"></i> LOUD <i class="dot"></i> UNAPOLOGETIC <i class="dot"></i> CHUNKY <i class="dot"></i> BOLD <i class="dot"></i> LOUD <i class="dot"></i> UNAPOLOGETIC <i class="dot"></i> CHUNKY <i class="dot"></i></span>
+  </div>
+</div>
+
+<!-- ============ FEATURES ============ -->
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">// WHY LOUDER™</span>
+      <h2 class="display">Six reasons your design got loud.</h2>
+    </div>
+
+    <div class="grid">
+      <article class="card c-yellow span-7 reveal" tabindex="0">
+        <div class="icon" aria-hidden="true">🧱</div>
+        <span class="num">01 / BORDERS</span>
+        <h3>Borders so thick they have opinions.</h3>
+        <p>Every box gets a 5px black outline whether it asked for it or not. Hesitation is not a supported color. Your layout will be seen from space.</p>
+      </article>
+
+      <article class="card c-ink span-5 reveal" tabindex="0">
+        <div class="icon" aria-hidden="true">🌑</div>
+        <span class="num">02 / SHADOWS</span>
+        <h3>Hard shadows. No blur. No mercy.</h3>
+        <p>Soft drop-shadows are for cowards. Ours are solid, offset, and proud — like a sticker someone slapped onto reality.</p>
+      </article>
+
+      <article class="card c-cyan span-4 reveal" tabindex="0">
+        <div class="icon" aria-hidden="true">🎨</div>
+        <span class="num">03 / COLOR</span>
+        <h3>Clash on purpose.</h3>
+        <p>Yellow next to pink next to cyan. The palette equivalent of yelling. It works because we said so.</p>
+      </article>
+
+      <article class="card c-pink span-4 reveal" tabindex="0">
+        <div class="icon" aria-hidden="true">📐</div>
+        <span class="num">04 / TYPE</span>
+        <h3>Type that takes up space.</h3>
+        <p>Oversized, ultra-bold, tightly packed. Whitespace is a luxury we cannot afford and would not want.</p>
+      </article>
+
+      <article class="card c-lime span-4 reveal" tabindex="0">
+        <div class="icon" aria-hidden="true">👆</div>
+        <span class="num">05 / MOTION</span>
+        <h3>Hovers you can feel.</h3>
+        <p>Everything snaps, pops, and physically shifts. No 600ms ease-in-out lullabies here — these buttons mean it.</p>
+      </article>
+
+      <article class="card c-white span-8 reveal" tabindex="0">
+        <div class="icon" aria-hidden="true">🚫</div>
+        <span class="num">06 / ATTITUDE</span>
+        <h3>Built for people allergic to "minimal & clean."</h3>
+        <p>If the brief said "make it pop," this is the pop. LOUDER™ ships with confidence pre-installed and a refund policy for anyone who wanted beige.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE 2 ============ -->
+<div class="marquee alt" aria-hidden="true">
+  <div class="marquee-track">
+    <span>★ SHIP IT LOUD ★ NO BEIGE ALLOWED ★ MORE CONTRAST ★ BIGGER SHADOWS ★ SHIP IT LOUD ★ NO BEIGE ALLOWED ★ MORE CONTRAST ★ BIGGER SHADOWS ★</span>
+    <span>★ SHIP IT LOUD ★ NO BEIGE ALLOWED ★ MORE CONTRAST ★ BIGGER SHADOWS ★ SHIP IT LOUD ★ NO BEIGE ALLOWED ★ MORE CONTRAST ★ BIGGER SHADOWS ★</span>
+  </div>
+</div>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="testi">
+  <div class="wrap">
+    <div class="section-head reveal" style="margin: 0 auto; text-align: center; max-width: 22ch;">
+      <span class="kicker">// WHAT THE CROWD SAYS</span>
+      <h2 class="display">Loud reviews from loud people.</h2>
+    </div>
+
+    <div class="notes">
+      <figure class="note reveal" tabindex="0">
+        <div class="stars">★★★★★</div>
+        <p>"I asked for something 'memorable' and now my landing page is legally recognized as a public hazard. Conversions doubled."</p>
+        <figcaption class="who">— PRIYA M., FOUNDER</figcaption>
+      </figure>
+
+      <figure class="note reveal" tabindex="0">
+        <div class="stars">★★★★★</div>
+        <p>"My designer said 'less is more.' I said 'more is more.' LOUDER™ agreed and we are no longer on speaking terms. 10/10."</p>
+        <figcaption class="who">— DEV K., MARKETER</figcaption>
+      </figure>
+
+      <figure class="note reveal" tabindex="0">
+        <div class="stars">★★★★★</div>
+        <p>"Loaded the site. My monitor flinched. My boss cried. We signed three clients before lunch."</p>
+        <figcaption class="who">— SAM R., AGENCY LEAD</figcaption>
+      </figure>
+
+      <figure class="note reveal" tabindex="0">
+        <div class="stars">★★★★☆</div>
+        <p>"Took off one star because I now own seventeen pairs of sunglasses. Worth it. Would yell again."</p>
+        <figcaption class="who">— ALEX T., DESIGNER</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER CTA ============ -->
+<section class="footer-cta" id="footer">
+  <div class="wrap">
+    <h2 class="display">Go big or <span class="spin" id="spinWord">go home</span>.</h2>
+    <p>You read the whole page. The borders worked. Now make something that refuses to be ignored.</p>
+    <a href="#" class="btn btn-ink">Start Yelling →</a>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <span class="brand">LOUDER™</span>
+    <span class="mono">DESIGN LAB · 03 — NEO-BRUTALIST</span>
+    <span class="mono">BUILT BY STANISH APPALO JA</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var reduced = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Scroll reveal (snap/overshoot in) ---------- */
+  var reveals = document.querySelectorAll(".reveal");
+  if (reduced) {
+    reveals.forEach(function (el) { el.classList.add("in"); });
+  } else if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e, i) {
+        if (e.isIntersecting) {
+          // tiny stagger for siblings revealing together
+          var delay = (e.target.dataset.delay ? +e.target.dataset.delay : 0);
+          setTimeout(function () { e.target.classList.add("in"); }, delay);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+    // stagger cards inside the same grid
+    var staggerGroups = document.querySelectorAll(".grid, .notes");
+    staggerGroups.forEach(function (group) {
+      var kids = group.querySelectorAll(".reveal");
+      kids.forEach(function (k, idx) { k.dataset.delay = idx * 70; });
+    });
+    reveals.forEach(function (el) { io.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add("in"); });
+  }
+
+  /* ---------- Cursor-following accent blob (pointer:fine only) ---------- */
+  var fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+  var blob = document.getElementById("blob");
+  if (blob && fine && !reduced) {
+    var bx = window.innerWidth / 2, by = window.innerHeight / 2;
+    var tx = bx, ty = by, raf = null;
+    function loop() {
+      bx += (tx - bx) * 0.18;
+      by += (ty - by) * 0.18;
+      blob.style.transform = "translate(" + bx + "px," + by + "px) translate(-50%,-50%)";
+      raf = requestAnimationFrame(loop);
+    }
+    window.addEventListener("mousemove", function (e) {
+      tx = e.clientX; ty = e.clientY;
+    }, { passive: true });
+    // grow over interactive things
+    document.querySelectorAll("a,button,.btn,.card,.note,#drag-sticker").forEach(function (el) {
+      el.addEventListener("mouseenter", function () { blob.style.width = "70px"; blob.style.height = "70px"; blob.style.background = "var(--cyan)"; });
+      el.addEventListener("mouseleave", function () { blob.style.width = "46px"; blob.style.height = "46px"; blob.style.background = "var(--pink)"; });
+    });
+    loop();
+  } else if (blob) {
+    blob.style.display = "none";
+  }
+
+  /* ---------- Draggable sticker (pointer events) ---------- */
+  var drag = document.getElementById("drag-sticker");
+  if (drag && fine) {
+    var dragging = false, offX = 0, offY = 0, rot = 6;
+    drag.addEventListener("pointerdown", function (e) {
+      dragging = true;
+      drag.classList.add("grabbing");
+      var r = drag.getBoundingClientRect();
+      offX = e.clientX - r.left;
+      offY = e.clientY - r.top;
+      drag.style.right = "auto";
+      try { drag.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    drag.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      var x = e.clientX - offX;
+      var y = e.clientY - offY;
+      // keep inside viewport-ish
+      x = Math.max(4, Math.min(x, window.innerWidth - drag.offsetWidth - 4));
+      y = Math.max(4, Math.min(y, window.innerHeight - drag.offsetHeight - 4));
+      drag.style.left = x + "px";
+      drag.style.top = y + "px";
+      drag.style.transform = "rotate(" + rot + "deg)";
+    });
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      drag.classList.remove("grabbing");
+      // little snap of rotation on release for personality
+      rot = (Math.random() * 16) - 8;
+      drag.style.transform = "rotate(" + rot + "deg)";
+    }
+    drag.addEventListener("pointerup", endDrag);
+    drag.addEventListener("pointercancel", endDrag);
+  } else if (drag) {
+    drag.style.display = "none";
+  }
+
+  /* ---------- Spin word in footer on hover/scroll-in ---------- */
+  var spinWord = document.getElementById("spinWord");
+  if (spinWord && !reduced) {
+    spinWord.style.transition = "transform 0.5s cubic-bezier(0.2,1.6,0.4,1)";
+    spinWord.addEventListener("mouseenter", function () {
+      spinWord.style.transform = "rotate(360deg) scale(1.1)";
+    });
+    spinWord.addEventListener("mouseleave", function () {
+      spinWord.style.transform = "rotate(0deg) scale(1)";
+    });
+  }
+
+  /* ---------- Optional GSAP enhancement (guarded) ---------- */
+  if (!reduced && window.gsap) {
+    try {
+      if (window.ScrollTrigger) { window.gsap.registerPlugin(window.ScrollTrigger); }
+      // subtle parallax drift on hero stickers if GSAP present
+      window.gsap.utils.toArray(".sticker").forEach(function (s) {
+        if (window.ScrollTrigger) {
+          window.gsap.to(s, {
+            yPercent: -18,
+            ease: "none",
+            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+          });
+        }
+      });
+    } catch (err) { /* GSAP optional — never break the page */ }
+  }
+})();
+</script>
+
+<!-- GSAP is optional flair; page is fully functional without it. Loaded last, guarded by feature checks above. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer onerror="this.dataset.failed=1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer onerror="this.dataset.failed=1"></script>
+
+</body>
+</html>

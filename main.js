@@ -1,7 +1,8 @@
 /* =========================================================
-   Portfolio — interactions & animation
-   Scroll reveal, count-up stats, rotating hero word,
-   3D tilt cards, scroll progress, mobile nav.
+   Portfolio — interactions & motion
+   Live screenshots (thum.io) with graceful fallback, custom
+   cursor, magnetic buttons, scroll reveals, count-up stats,
+   scroll progress, mobile nav, FAQ accordion polish.
    All motion respects prefers-reduced-motion.
    ========================================================= */
 
@@ -9,20 +10,30 @@
   "use strict";
 
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // Signal CSS that JS is active (enables reveal hidden state).
+  var finePointer = window.matchMedia("(pointer: fine)").matches;
   document.documentElement.classList.add("js");
 
   /* ---- Footer year ---- */
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* ---- Sticky header shadow + scroll progress bar ---- */
+  /* ---- Project screenshots ----
+     Each <img data-shot src="assets/shots/x.jpg"> is a real,
+     bundled screenshot of the deployed site. We reveal it once it
+     loads; if it ever fails, the styled fallback behind it stays. */
+  document.querySelectorAll("img[data-shot]").forEach(function (img) {
+    function ok() { img.classList.add("loaded"); }
+    function fail() { img.classList.remove("loaded"); }
+    if (img.complete && img.naturalWidth > 0) { ok(); }
+    else { img.addEventListener("load", ok); img.addEventListener("error", fail); }
+  });
+
+  /* ---- Sticky header + scroll progress ---- */
   var header = document.getElementById("header");
   var progress = document.getElementById("scrollProgress");
   function onScroll() {
     var y = window.scrollY;
-    if (header) header.classList.toggle("scrolled", y > 8);
+    if (header) header.classList.toggle("scrolled", y > 10);
     if (progress) {
       var h = document.documentElement;
       var max = h.scrollHeight - h.clientHeight;
@@ -48,7 +59,7 @@
     });
   }
 
-  /* ---- Count-up animation ---- */
+  /* ---- Count-up stats ---- */
   function countUp(el) {
     var target = parseInt(el.getAttribute("data-count"), 10) || 0;
     var suffix = el.getAttribute("data-suffix") || "";
@@ -57,7 +68,7 @@
     function step(ts) {
       if (start === null) start = ts;
       var p = Math.min((ts - start) / duration, 1);
-      var eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      var eased = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.round(eased * target) + suffix;
       if (p < 1) requestAnimationFrame(step);
     }
@@ -72,54 +83,73 @@
     el.classList.add("is-visible");
     el.querySelectorAll("[data-count]").forEach(countUp);
   }
-
   if ("IntersectionObserver" in window) {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          showEl(entry.target);
-          observer.unobserve(entry.target);
-        }
+        if (entry.isIntersecting) { showEl(entry.target); observer.unobserve(entry.target); }
       });
-    }, { threshold: 0.18, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
     revealEls.forEach(function (el) { observer.observe(el); });
   } else {
-    revealEls.forEach(showEl); // fallback: just show everything
+    revealEls.forEach(showEl);
   }
 
-  /* ---- Rotating hero word ---- */
-  var rotator = document.getElementById("rotator");
-  if (rotator && !reduce) {
-    var words = ["fast", "modern", "responsive", "accessible", "full-stack"];
-    var i = 0;
-    setInterval(function () {
-      i = (i + 1) % words.length;
-      rotator.classList.remove("swap");
-      // force reflow so the animation can replay
-      void rotator.offsetWidth;
-      rotator.textContent = words[i];
-      rotator.classList.add("swap");
-    }, 2200);
-  }
+  /* ---- FAQ: only one open at a time ---- */
+  var faqItems = document.querySelectorAll(".faq-item");
+  faqItems.forEach(function (item) {
+    item.addEventListener("toggle", function () {
+      if (item.open) {
+        faqItems.forEach(function (other) { if (other !== item) other.open = false; });
+      }
+    });
+  });
 
-  /* ---- 3D tilt on project cards ---- */
-  if (!reduce && window.matchMedia("(pointer: fine)").matches) {
-    document.querySelectorAll("[data-tilt]").forEach(function (card) {
-      var max = 7; // degrees
-      card.addEventListener("mouseenter", function () {
-        card.style.transition = "transform .08s linear"; // snappy while tilting
+  /* ---- Custom cursor + magnetic buttons (fine pointers only) ---- */
+  if (finePointer && !reduce) {
+    var cursor = document.getElementById("cursor");
+    if (cursor) {
+      document.documentElement.classList.add("cursor-on");
+      cursor.style.display = "flex";
+      cursor.style.alignItems = "center";
+      cursor.style.justifyContent = "center";
+      var label = document.createElement("span");
+      label.className = "ct";
+      cursor.appendChild(label);
+
+      var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      var rx = cx, ry = cy;
+      window.addEventListener("mousemove", function (e) { cx = e.clientX; cy = e.clientY; }, { passive: true });
+      (function loop() {
+        rx += (cx - rx) * 0.2; ry += (cy - ry) * 0.2;
+        cursor.style.transform = "translate(" + rx + "px," + ry + "px) translate(-50%,-50%)";
+        requestAnimationFrame(loop);
+      })();
+
+      document.querySelectorAll("[data-cursor]").forEach(function (el) {
+        var text = el.getAttribute("data-cursor-text");
+        el.addEventListener("mouseenter", function () {
+          if (text) { cursor.classList.add("has-text"); label.textContent = text; }
+          else { cursor.classList.add("active"); }
+        });
+        el.addEventListener("mouseleave", function () {
+          cursor.classList.remove("active", "has-text"); label.textContent = "";
+        });
       });
-      card.addEventListener("mousemove", function (e) {
-        var r = card.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform =
-          "perspective(900px) rotateX(" + (-py * max).toFixed(2) + "deg) rotateY(" +
-          (px * max).toFixed(2) + "deg) translateY(-6px)";
+      document.addEventListener("mouseleave", function () { cursor.style.opacity = "0"; });
+      document.addEventListener("mouseenter", function () { cursor.style.opacity = "1"; });
+    }
+
+    /* Magnetic pull on key buttons */
+    document.querySelectorAll("[data-magnetic]").forEach(function (el) {
+      var strength = 0.4;
+      el.addEventListener("mousemove", function (e) {
+        var r = el.getBoundingClientRect();
+        var mx = e.clientX - (r.left + r.width / 2);
+        var my = e.clientY - (r.top + r.height / 2);
+        el.style.transform = "translate(" + (mx * strength) + "px," + (my * strength) + "px)";
       });
-      card.addEventListener("mouseleave", function () {
-        card.style.transition = "transform .4s cubic-bezier(.2,.7,.2,1)"; // smooth settle back
-        card.style.transform = "";
+      el.addEventListener("mouseleave", function () {
+        el.style.transform = "";
       });
     });
   }

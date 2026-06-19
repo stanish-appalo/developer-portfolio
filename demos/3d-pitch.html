@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spatial — 3D Pitch · Design Lab</title>
+<meta name="description" content="A spatial WebGL pitch. We build immersive 3D worlds for the web — by Stanish Appalo JA." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --bg:#06060c;
+    --bg-2:#0b0b16;
+    --ink:#eef0ff;
+    --ink-dim:#9aa0c0;
+    --ink-faint:#5a5f80;
+    --violet:#7c5cff;
+    --cyan:#22d3ee;
+    --line:rgba(124,92,255,.16);
+    --pill:rgba(20,20,34,.6);
+    --display:"Space Grotesk", system-ui, sans-serif;
+    --mono:"Space Mono", ui-monospace, monospace;
+    --body:"Inter", system-ui, sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    cursor:auto;
+  }
+
+  ::selection{ background:var(--violet); color:#fff; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- Layout helpers ---------- */
+  .wrap{ width:min(1180px, 90vw); margin-inline:auto; }
+  .section{ position:relative; padding:clamp(90px,14vh,180px) 0; }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:clamp(11px,1.4vw,13px);
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    display:inline-flex;
+    align-items:center;
+    gap:.7em;
+  }
+  .eyebrow::before{
+    content:"";
+    width:26px; height:1px;
+    background:linear-gradient(90deg,var(--violet),var(--cyan));
+    display:inline-block;
+  }
+
+  h2.head{
+    font-family:var(--display);
+    font-weight:600;
+    line-height:1.02;
+    letter-spacing:-.02em;
+    font-size:clamp(34px,6.4vw,84px);
+    margin:.35em 0 .5em;
+  }
+
+  .lead{
+    color:var(--ink-dim);
+    font-size:clamp(16px,1.9vw,21px);
+    max-width:58ch;
+  }
+
+  .accent{
+    background:linear-gradient(100deg,var(--violet),var(--cyan));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  /* ---------- Fixed chrome ---------- */
+  .back-pill{
+    position:fixed; top:18px; left:18px; z-index:60;
+    display:inline-flex; align-items:center; gap:.5em;
+    padding:9px 16px;
+    font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    color:var(--ink);
+    background:var(--pill);
+    border:1px solid var(--line);
+    border-radius:999px;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:border-color .25s, transform .25s, background .25s;
+  }
+  .back-pill:hover{ border-color:var(--cyan); transform:translateX(-2px); background:rgba(34,211,238,.08); }
+
+  .lab-tag{
+    position:fixed; top:22px; right:20px; z-index:60;
+    font-family:var(--mono); font-size:11px; letter-spacing:.22em;
+    color:var(--ink-faint); text-transform:uppercase;
+    text-align:right; pointer-events:none;
+  }
+  .lab-tag b{ color:var(--ink-dim); font-weight:400; }
+
+  /* Scroll progress */
+  .progress{
+    position:fixed; top:0; left:0; height:2px; width:0%;
+    background:linear-gradient(90deg,var(--violet),var(--cyan));
+    z-index:70; box-shadow:0 0 12px rgba(124,92,255,.6);
+  }
+
+  /* Grain + vignette */
+  .fx-overlay{
+    position:fixed; inset:0; z-index:55; pointer-events:none;
+    mix-blend-mode:soft-light; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+  .vignette{
+    position:fixed; inset:0; z-index:54; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,.55) 100%);
+  }
+
+  /* Custom cursor (pointer:fine only) */
+  .cursor{
+    position:fixed; top:0; left:0; z-index:90; pointer-events:none;
+    width:34px; height:34px; margin:-17px 0 0 -17px;
+    border:1px solid rgba(124,92,255,.7); border-radius:50%;
+    transition:width .2s, height .2s, margin .2s, border-color .2s, background .2s;
+    will-change:transform; display:none;
+  }
+  .cursor.is-active{ width:54px; height:54px; margin:-27px 0 0 -27px; background:rgba(34,211,238,.08); border-color:var(--cyan); }
+  .cursor-dot{
+    position:fixed; top:0; left:0; z-index:91; pointer-events:none;
+    width:5px; height:5px; margin:-2.5px 0 0 -2.5px;
+    background:var(--cyan); border-radius:50%; will-change:transform; display:none;
+  }
+  @media (pointer:fine){
+    .cursor, .cursor-dot{ display:block; }
+  }
+
+  /* ---------- HERO ---------- */
+  #hero{ position:relative; height:100svh; min-height:600px; overflow:hidden; }
+  #hero-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  /* dark scrim so the headline stays readable over the bright blob */
+  .hero-scrim{ position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:
+      linear-gradient(90deg, rgba(5,5,11,.96) 0%, rgba(5,5,11,.8) 30%, rgba(5,5,11,.5) 52%, rgba(5,5,11,.3) 72%, rgba(5,5,11,.44) 100%),
+      linear-gradient(rgba(5,5,11,.32), rgba(5,5,11,.16)); }
+  .hero-fallback{
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(60% 50% at 70% 30%, rgba(124,92,255,.35), transparent 60%),
+      radial-gradient(50% 50% at 30% 70%, rgba(34,211,238,.28), transparent 60%),
+      var(--bg);
+  }
+  .hero-inner{
+    position:relative; z-index:3;
+    height:100%; display:flex; flex-direction:column; justify-content:center;
+    pointer-events:none;
+  }
+  .hero-inner .wrap{ pointer-events:none; }
+  .hero-eyebrow{ opacity:0; transform:translateY(14px); }
+  .hero-title{
+    font-family:var(--display); font-weight:700;
+    font-size:clamp(44px,9.2vw,128px);
+    line-height:.96; letter-spacing:-.035em;
+    margin:.18em 0 .35em; max-width:14ch;
+    text-shadow:0 2px 28px rgba(0,0,0,.62), 0 1px 3px rgba(0,0,0,.55);
+  }
+  .hero-title .accent{ filter:drop-shadow(0 2px 14px rgba(0,0,0,.55)); }
+  .mask{ overflow:hidden; display:block; }
+  .mask > span{ display:block; transform:translateY(110%); }
+  .hero-sub{
+    color:var(--ink-dim); font-size:clamp(15px,2vw,19px);
+    max-width:46ch; opacity:0; transform:translateY(14px);
+    text-shadow:0 1px 18px rgba(0,0,0,.7);
+  }
+  .scroll-cue{
+    position:absolute; left:50%; bottom:26px; transform:translateX(-50%);
+    z-index:4; display:flex; flex-direction:column; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:10px; letter-spacing:.3em; color:var(--ink-faint);
+    text-transform:uppercase;
+  }
+  .scroll-cue .bar{
+    width:1px; height:46px; background:linear-gradient(var(--cyan),transparent);
+    animation:cuePulse 2.2s ease-in-out infinite;
+  }
+  @keyframes cuePulse{ 0%,100%{ opacity:.3; transform:scaleY(.6); transform-origin:top; } 50%{ opacity:1; transform:scaleY(1); } }
+
+  /* ---------- Reveal utilities ---------- */
+  .reveal{ opacity:0; transform:translateY(26px); }
+  .line-mask{ overflow:hidden; }
+  .line-mask > .line-inner{ display:block; transform:translateY(110%); }
+
+  /* ---------- Manifesto ---------- */
+  .manifesto p{
+    font-family:var(--display); font-weight:500;
+    font-size:clamp(24px,4.4vw,52px);
+    line-height:1.15; letter-spacing:-.02em; color:var(--ink);
+    max-width:20ch;
+  }
+  .manifesto .dim{ color:var(--ink-faint); }
+
+  /* ---------- Capabilities grid ---------- */
+  .cap-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px; margin-top:54px;
+  }
+  .cap{
+    border:1px solid var(--line); border-radius:18px;
+    padding:30px 26px 34px;
+    background:linear-gradient(180deg, rgba(124,92,255,.05), rgba(11,11,22,.2));
+    position:relative; overflow:hidden;
+    transition:border-color .3s, transform .3s;
+  }
+  .cap:hover{ border-color:rgba(34,211,238,.4); transform:translateY(-4px); }
+  .cap::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(120% 80% at 0% 0%, rgba(124,92,255,.12), transparent 60%);
+    opacity:0; transition:opacity .3s;
+  }
+  .cap:hover::after{ opacity:1; }
+  .cap .n{ font-family:var(--mono); font-size:12px; color:var(--cyan); letter-spacing:.1em; }
+  .cap h3{ font-family:var(--display); font-weight:600; font-size:23px; margin:14px 0 10px; }
+  .cap p{ color:var(--ink-dim); font-size:15px; }
+
+  /* ---------- Parallax band ---------- */
+  .band{
+    position:relative; padding:clamp(120px,20vh,240px) 0; overflow:hidden;
+    border-block:1px solid var(--line);
+  }
+  .band-bg{
+    position:absolute; inset:-20% 0; z-index:0;
+    background:
+      radial-gradient(40% 60% at 20% 30%, rgba(124,92,255,.22), transparent 60%),
+      radial-gradient(40% 60% at 85% 70%, rgba(34,211,238,.18), transparent 60%);
+    will-change:transform;
+  }
+  .band-quote{
+    position:relative; z-index:2; text-align:center;
+    font-family:var(--display); font-weight:600;
+    font-size:clamp(28px,5.6vw,72px); line-height:1.04; letter-spacing:-.025em;
+    max-width:16ch; margin-inline:auto;
+  }
+  .band-quote em{ font-style:normal; }
+
+  /* ---------- Stats ---------- */
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:48px;
+  }
+  .stat{ border-top:1px solid var(--line); padding-top:22px; }
+  .stat .num{
+    font-family:var(--display); font-weight:700;
+    font-size:clamp(40px,6.5vw,76px); line-height:1; letter-spacing:-.03em;
+  }
+  .stat .num .u{ font-size:.4em; color:var(--cyan); margin-left:.1em; font-weight:500; }
+  .stat .lab{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--ink-faint); text-transform:uppercase; margin-top:12px; }
+  @media (max-width:760px){ .stats{ grid-template-columns:repeat(2,1fr); gap:30px 24px; } }
+
+  /* ---------- Sculpture ---------- */
+  #sculpt{ position:relative; }
+  .sculpt-grid{
+    display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center;
+  }
+  .sculpt-stage{
+    position:relative; aspect-ratio:1/1; width:100%;
+    border:1px solid var(--line); border-radius:24px; overflow:hidden;
+    background:radial-gradient(120% 120% at 50% 30%, rgba(124,92,255,.1), rgba(6,6,12,.6));
+    touch-action:none; cursor:grab;
+  }
+  .sculpt-stage.dragging{ cursor:grabbing; }
+  #sculpt-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .sculpt-fallback{
+    position:absolute; inset:0; display:grid; place-items:center; text-align:center;
+    color:var(--ink-faint); font-family:var(--mono); font-size:13px; padding:30px;
+  }
+  .sculpt-hint{
+    position:absolute; left:16px; bottom:14px; z-index:3;
+    font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--ink-dim);
+    background:rgba(6,6,12,.5); padding:6px 12px; border-radius:999px;
+    border:1px solid var(--line); backdrop-filter:blur(6px);
+  }
+  @media (max-width:860px){
+    .sculpt-grid{ grid-template-columns:1fr; gap:30px; }
+    .sculpt-stage{ max-width:520px; margin-inline:auto; }
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:.6em;
+    font-family:var(--display); font-weight:600; font-size:17px;
+    padding:16px 28px; border-radius:999px;
+    background:linear-gradient(100deg,var(--violet),var(--cyan));
+    color:#08080f; position:relative; overflow:hidden;
+    transition:transform .25s, box-shadow .25s;
+    box-shadow:0 8px 40px rgba(124,92,255,.25);
+    will-change:transform;
+  }
+  .btn:hover{ box-shadow:0 12px 56px rgba(34,211,238,.35); }
+  .btn .arr{ transition:transform .25s; }
+  .btn:hover .arr{ transform:translateX(5px); }
+  .btn-ghost{
+    display:inline-flex; align-items:center; gap:.6em;
+    font-family:var(--mono); font-size:13px; letter-spacing:.06em;
+    padding:14px 22px; border-radius:999px; color:var(--ink);
+    border:1px solid var(--line); transition:border-color .25s, color .25s;
+  }
+  .btn-ghost:hover{ border-color:var(--cyan); color:var(--cyan); }
+
+  /* ---------- CTA ---------- */
+  #cta{ text-align:center; position:relative; overflow:hidden; }
+  #cta .glow{
+    position:absolute; inset:0; z-index:0;
+    background:radial-gradient(50% 60% at 50% 60%, rgba(124,92,255,.18), transparent 60%);
+  }
+  #cta .inner{ position:relative; z-index:2; }
+  .cta-title{
+    font-family:var(--display); font-weight:700; letter-spacing:-.03em; line-height:1;
+    font-size:clamp(40px,8.4vw,108px); margin:.2em 0 .5em;
+  }
+  .cta-actions{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    border-top:1px solid var(--line); padding:30px 0;
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint);
+    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    letter-spacing:.04em;
+  }
+  footer a{ color:var(--ink-dim); }
+  footer a:hover{ color:var(--cyan); }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto; }
+    .scroll-cue .bar{ animation:none; }
+    .mask > span,
+    .hero-eyebrow,
+    .hero-sub,
+    .reveal,
+    .line-mask > .line-inner{ opacity:1 !important; transform:none !important; }
+    .fx-overlay{ opacity:.28; }
+  }
+</style>
+</head>
+<body>
+
+<a href="../index.html#lab" class="back-pill" data-magnetic>← Back to Lab</a>
+<div class="lab-tag">DESIGN LAB · 01<br /><b>SPATIAL 3D</b></div>
+<div class="progress" id="progress"></div>
+<div class="vignette"></div>
+<div class="fx-overlay"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- ===================== HERO ===================== -->
+<header id="hero">
+  <div class="hero-fallback"></div>
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-scrim" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="wrap">
+      <span class="eyebrow hero-eyebrow">Spatial — A 3D Pitch</span>
+      <h1 class="hero-title">
+        <span class="mask"><span>We build worlds,</span></span>
+        <span class="mask"><span class="accent">not just websites.</span></span>
+      </h1>
+      <p class="hero-sub">Real-time WebGL, custom shaders, and motion that responds to you. Scroll in — let me show you what the browser can really do.</p>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Scroll</span><span class="bar"></span></div>
+</header>
+
+<!-- ===================== MANIFESTO ===================== -->
+<section class="section manifesto">
+  <div class="wrap">
+    <span class="eyebrow">001 — The Premise</span>
+    <h2 class="head" style="max-width:18ch;">A flat page is a <span class="accent">missed</span> dimension.</h2>
+    <p class="line-block" style="margin-top:10px;">
+      <span class="line-mask"><span class="line-inner manifesto-line">Most sites live on a plane. The good ones step off it —</span></span>
+      <span class="line-mask"><span class="line-inner manifesto-line">they have weight, depth, and a sense of <em class="accent" style="font-style:normal;">place</em>.</span></span>
+      <span class="line-mask"><span class="line-inner manifesto-line dim">I make that feeling run at 60 frames a second, in a browser tab.</span></span>
+    </p>
+  </div>
+</section>
+
+<!-- ===================== CAPABILITIES ===================== -->
+<section class="section">
+  <div class="wrap">
+    <span class="eyebrow reveal">002 — What I bring</span>
+    <h2 class="head reveal" style="max-width:16ch;">A full spatial toolkit, end&nbsp;to&nbsp;end.</h2>
+    <div class="cap-grid">
+      <article class="cap reveal">
+        <div class="n">01</div>
+        <h3>GLSL Shaders</h3>
+        <p>Hand-written vertex &amp; fragment shaders — noise displacement, fresnel rims, iridescence. The blob above is one of mine.</p>
+      </article>
+      <article class="cap reveal">
+        <div class="n">02</div>
+        <h3>Scrollytelling</h3>
+        <p>GSAP ScrollTrigger choreographs camera, geometry and type into a single cinematic timeline that scrubs with the page.</p>
+      </article>
+      <article class="cap reveal">
+        <div class="n">03</div>
+        <h3>Interaction</h3>
+        <p>Pointer-driven rotation, inertia, hover states and reactive uniforms — 3D that feels alive instead of decorative.</p>
+      </article>
+      <article class="cap reveal">
+        <div class="n">04</div>
+        <h3>Performance</h3>
+        <p>Capped pixel ratios, paused render loops off-screen, and a graceful fallback when WebGL or a CDN isn't there.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PARALLAX BAND ===================== -->
+<section class="band">
+  <div class="band-bg" id="bandBg"></div>
+  <div class="wrap">
+    <p class="band-quote reveal">Depth isn't decoration. <em class="accent">It's how you make people feel they've arrived.</em></p>
+  </div>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<section class="section">
+  <div class="wrap">
+    <span class="eyebrow reveal">003 — By the numbers</span>
+    <h2 class="head reveal" style="max-width:14ch;">Built to feel weightless.</h2>
+    <div class="stats" id="stats">
+      <div class="stat"><div class="num"><span data-count="60">0</span><span class="u">fps</span></div><div class="lab">Locked render target</div></div>
+      <div class="stat"><div class="num"><span data-count="11">0</span><span class="u">ms</span></div><div class="lab">Frame budget hit</div></div>
+      <div class="stat"><div class="num"><span data-count="40">0</span><span class="u">k</span></div><div class="lab">Verts in the hero blob</div></div>
+      <div class="stat"><div class="num"><span data-count="100">0</span><span class="u">%</span></div><div class="lab">No-WebGL fallback</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SCULPTURE ===================== -->
+<section class="section" id="sculpt">
+  <div class="wrap">
+    <span class="eyebrow reveal">004 — Take the controls</span>
+    <div class="sculpt-grid">
+      <div class="sculpt-stage" id="sculptStage">
+        <canvas id="sculpt-canvas"></canvas>
+        <div class="sculpt-fallback" id="sculptFallback" hidden>WebGL unavailable — here's where a glossy, draggable artifact would spin.</div>
+        <div class="sculpt-hint">drag to rotate · click me</div>
+      </div>
+      <div>
+        <h2 class="head reveal" style="font-size:clamp(30px,5vw,58px); max-width:12ch;">Reach in and <span class="accent">touch it.</span></h2>
+        <p class="lead reveal">This artifact is lit by four colored lights and rendered live. Grab it, throw it, let it coast on its own momentum — then give it a tap to watch it pulse. Every interaction you'd ship in a real product, prototyped here.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="section" id="cta">
+  <div class="glow"></div>
+  <div class="wrap inner">
+    <span class="eyebrow reveal" style="justify-content:center;">005 — Your move</span>
+    <h2 class="cta-title reveal">Let's build<br />something with <span class="accent">depth.</span></h2>
+    <p class="lead reveal" style="margin-inline:auto;">Have a launch, a product, or a portfolio that deserves the third dimension? I'd love to make it move.</p>
+    <div class="cta-actions reveal">
+      <a class="btn" href="../index.html#contact" data-magnetic>Let's build something with depth <span class="arr">→</span></a>
+      <a class="btn-ghost" href="../index.html#lab" data-magnetic>← Back to the Lab</a>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="width:min(1180px,90vw);">
+  <span>STANISH APPALO JA — DESIGN LAB</span>
+  <span>SPATIAL · 01 — WebGL / GSAP / Three.js</span>
+</footer>
+
+<!-- ===================== LIBRARIES ===================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var FINE = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+  var hasTHREE = !!window.THREE;
+  var hasGSAP = !!window.gsap;
+  var hasST = !!(window.gsap && window.ScrollTrigger);
+
+  if (hasST) { try { gsap.registerPlugin(ScrollTrigger); } catch(e){} }
+
+  // ---- shared mouse (normalized -1..1) ----
+  var mouse = { x:0, y:0, tx:0, ty:0 };
+  window.addEventListener("pointermove", function(e){
+    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.ty = -((e.clientY / window.innerHeight) * 2 - 1);
+  }, { passive:true });
+
+  // ======================================================
+  //  HERO : morphing shader blob
+  // ======================================================
+  var heroState = null;
+  function initHero(){
+    if (!hasTHREE) return;
+    var canvas = document.getElementById("hero-canvas");
+    if (!canvas) return;
+
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+    } catch(err){ return; }
+    renderer.setClearColor(0x000000, 0);
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 4.2);
+
+    var geo = new THREE.IcosahedronGeometry(1.2, 40);
+
+    var vertexShader = [
+      "uniform float uTime;",
+      "uniform vec2 uMouse;",
+      "uniform float uScroll;",
+      "varying vec3 vNormal;",
+      "varying vec3 vPos;",
+      "varying float vNoise;",
+      // ---- Ashima simplex noise 3D ----
+      "vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x,289.0);}",
+      "vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}",
+      "float snoise(vec3 v){",
+      "  const vec2 C = vec2(1.0/6.0, 1.0/3.0);",
+      "  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);",
+      "  vec3 i  = floor(v + dot(v, C.yyy));",
+      "  vec3 x0 = v - i + dot(i, C.xxx);",
+      "  vec3 g = step(x0.yzx, x0.xyz);",
+      "  vec3 l = 1.0 - g;",
+      "  vec3 i1 = min(g.xyz, l.zxy);",
+      "  vec3 i2 = max(g.xyz, l.zxy);",
+      "  vec3 x1 = x0 - i1 + 1.0 * C.xxx;",
+      "  vec3 x2 = x0 - i2 + 2.0 * C.xxx;",
+      "  vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;",
+      "  i = mod(i, 289.0);",
+      "  vec4 p = permute(permute(permute(",
+      "             i.z + vec4(0.0, i1.z, i2.z, 1.0))",
+      "           + i.y + vec4(0.0, i1.y, i2.y, 1.0))",
+      "           + i.x + vec4(0.0, i1.x, i2.x, 1.0));",
+      "  float n_ = 1.0/7.0;",
+      "  vec3 ns = n_ * D.wyz - D.xzx;",
+      "  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);",
+      "  vec4 x_ = floor(j * ns.z);",
+      "  vec4 y_ = floor(j - 7.0 * x_);",
+      "  vec4 x = x_ * ns.x + ns.yyyy;",
+      "  vec4 y = y_ * ns.x + ns.yyyy;",
+      "  vec4 h = 1.0 - abs(x) - abs(y);",
+      "  vec4 b0 = vec4(x.xy, y.xy);",
+      "  vec4 b1 = vec4(x.zw, y.zw);",
+      "  vec4 s0 = floor(b0) * 2.0 + 1.0;",
+      "  vec4 s1 = floor(b1) * 2.0 + 1.0;",
+      "  vec4 sh = -step(h, vec4(0.0));",
+      "  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;",
+      "  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;",
+      "  vec3 p0 = vec3(a0.xy, h.x);",
+      "  vec3 p1 = vec3(a0.zw, h.y);",
+      "  vec3 p2 = vec3(a1.xy, h.z);",
+      "  vec3 p3 = vec3(a1.zw, h.w);",
+      "  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));",
+      "  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;",
+      "  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);",
+      "  m = m * m;",
+      "  return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));",
+      "}",
+      "void main(){",
+      "  vNormal = normal;",
+      "  float t = uTime * 0.45;",
+      "  vec3 p = position;",
+      "  float mAmp = 0.18 + length(uMouse) * 0.10;",
+      "  float n = snoise(p * 1.3 + vec3(t, t*0.7, -t*0.5));",
+      "  n += 0.5 * snoise(p * 2.6 + vec3(-t*0.6, t, t*0.4));",
+      "  float disp = n * (0.32 + mAmp) + uScroll * 0.12;",
+      "  vNoise = n;",
+      "  vec3 displaced = p + normal * disp;",
+      "  vPos = displaced;",
+      "  gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);",
+      "}"
+    ].join("\n");
+
+    var fragmentShader = [
+      "uniform float uTime;",
+      "uniform vec3 uColorA;",
+      "uniform vec3 uColorB;",
+      "varying vec3 vNormal;",
+      "varying vec3 vPos;",
+      "varying float vNoise;",
+      "void main(){",
+      "  vec3 nrm = normalize(vNormal);",
+      "  vec3 viewDir = normalize(cameraPosition - vPos);",
+      "  float fres = pow(1.0 - clamp(dot(viewDir, nrm), 0.0, 1.0), 2.4);",
+      "  float mixv = 0.5 + 0.5 * sin(vNoise * 2.4 + uTime * 0.6 + vPos.y * 1.5);",
+      "  vec3 base = mix(uColorA, uColorB, mixv);",
+      "  vec3 col = base + fres * (uColorB * 1.3);",
+      "  col += vec3(0.04, 0.0, 0.08);",
+      "  gl_FragColor = vec4(col, 1.0);",
+      "}"
+    ].join("\n");
+
+    var mat = new THREE.ShaderMaterial({
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      uniforms: {
+        uTime:   { value: 0 },
+        uMouse:  { value: new THREE.Vector2(0,0) },
+        uScroll: { value: 0 },
+        uColorA: { value: new THREE.Color(0x7c5cff) },
+        uColorB: { value: new THREE.Color(0x22d3ee) }
+      }
+    });
+
+    var mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+
+    // faint inner glow sphere for depth
+    var glowGeo = new THREE.SphereGeometry(0.9, 32, 32);
+    var glowMat = new THREE.MeshBasicMaterial({ color:0x1a1233, transparent:true, opacity:0.5 });
+    var glow = new THREE.Mesh(glowGeo, glowMat);
+    scene.add(glow);
+
+    function resize(){
+      var w = canvas.clientWidth || window.innerWidth;
+      var h = canvas.clientHeight || window.innerHeight;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      // pull camera back on narrow screens so blob fits
+      camera.position.z = w < 640 ? 5.4 : 4.2;
+      // push the blob toward the right so it doesn't sit behind the left-aligned headline
+      var offX = w < 760 ? 0 : 1.7;
+      mesh.position.x = offX; glow.position.x = offX;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+
+    heroState = {
+      mesh:mesh, mat:mat, scrollProg:0, baseScale:1, visible:true,
+      resize:resize, renderer:renderer
+    };
+
+    var clock = new THREE.Clock();
+    function render(){
+      if (!heroState) return;
+      var t = clock.getElapsedTime();
+      mat.uniforms.uTime.value = REDUCED ? 0.0 : t;
+      mouse.x += (mouse.tx - mouse.x) * 0.06;
+      mouse.y += (mouse.ty - mouse.y) * 0.06;
+      mat.uniforms.uMouse.value.set(mouse.x, mouse.y);
+      mat.uniforms.uScroll.value = heroState.scrollProg;
+
+      if (!REDUCED){
+        mesh.rotation.y += 0.0016;
+        mesh.rotation.x = mouse.y * 0.25;
+        mesh.rotation.z = mouse.x * 0.12;
+      }
+      // scroll-driven scale + extra rotation
+      var sc = heroState.baseScale * (1 + heroState.scrollProg * 0.6);
+      mesh.scale.setScalar(sc);
+      glow.scale.setScalar(sc);
+      mesh.rotation.y += 0; // keep linter calm
+      mesh.position.y = heroState.scrollProg * 0.4;
+      glow.position.y = mesh.position.y;
+
+      renderer.render(scene, camera);
+    }
+
+    return { render:render };
+  }
+
+  // ======================================================
+  //  SCULPTURE : draggable glossy object
+  // ======================================================
+  var sculptState = null;
+  function initSculpt(){
+    if (!hasTHREE) {
+      var fb = document.getElementById("sculptFallback");
+      if (fb) fb.hidden = false;
+      return null;
+    }
+    var canvas = document.getElementById("sculpt-canvas");
+    var stage = document.getElementById("sculptStage");
+    if (!canvas || !stage) return null;
+
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+    } catch(err){
+      var fb2 = document.getElementById("sculptFallback");
+      if (fb2) fb2.hidden = false;
+      return null;
+    }
+    renderer.setClearColor(0x000000, 0);
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0, 0, 4.6);
+
+    var geo = new THREE.TorusKnotGeometry(0.85, 0.3, 220, 36, 2, 3);
+    var mat = new THREE.MeshStandardMaterial({
+      color:0x8b7bff, metalness:0.32, roughness:0.18,
+      emissive:0x0a0820, emissiveIntensity:0.6
+    });
+    var mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+
+    var amb = new THREE.AmbientLight(0x223355, 0.55);
+    scene.add(amb);
+
+    function dir(color, x, y, z, intensity){
+      var l = new THREE.DirectionalLight(color, intensity);
+      l.position.set(x, y, z);
+      scene.add(l);
+      return l;
+    }
+    dir(0x7c5cff,  3,  2,  4, 1.4);  // violet key
+    dir(0x22d3ee, -4,  1,  2, 1.2);  // cyan fill
+    dir(0xff5ca8,  0, -3, -2, 0.9);  // pink rim
+    dir(0xffffff,  1,  4, -3, 0.5);  // white top
+
+    function resize(){
+      var w = stage.clientWidth || 1;
+      var h = stage.clientHeight || 1;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+
+    var rot = { x:0.2, y:0, vx:0, vy:0 };
+    var dragging = false, last = { x:0, y:0 }, moved = false;
+    var pulse = 0; // 0..1 transient
+    var flash = 0;
+    var hueShift = 0;
+
+    function onDown(e){
+      dragging = true; moved = false;
+      stage.classList.add("dragging");
+      last.x = e.clientX; last.y = e.clientY;
+      if (e.target.setPointerCapture) { try{ e.target.setPointerCapture(e.pointerId); }catch(_){} }
+    }
+    function onMove(e){
+      if (!dragging) return;
+      var dx = e.clientX - last.x;
+      var dy = e.clientY - last.y;
+      if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+      rot.vy = dx * 0.005;
+      rot.vx = dy * 0.005;
+      rot.y += rot.vy;
+      rot.x += rot.vx;
+      last.x = e.clientX; last.y = e.clientY;
+    }
+    function onUp(e){
+      if (!dragging) return;
+      dragging = false;
+      stage.classList.remove("dragging");
+      if (!moved){
+        // it's a click -> reaction
+        pulse = 1;
+        flash = 1;
+        hueShift += 0.18;
+      }
+    }
+    canvas.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove, { passive:true });
+    window.addEventListener("pointerup", onUp);
+    canvas.addEventListener("pointercancel", onUp);
+
+    var baseColor = new THREE.Color(0x8b7bff);
+    var flashColor = new THREE.Color(0x22d3ee);
+    var tmpColor = new THREE.Color();
+    var visible = true;
+
+    function render(){
+      if (!dragging){
+        if (REDUCED){
+          // static, no auto-spin
+        } else {
+          // inertia + gentle auto-spin when idle
+          rot.y += rot.vy;
+          rot.x += rot.vx;
+          rot.vy *= 0.94;
+          rot.vx *= 0.94;
+          if (Math.abs(rot.vy) < 0.0006 && Math.abs(rot.vx) < 0.0006){
+            rot.y += 0.0045; // auto spin
+          }
+        }
+      }
+      mesh.rotation.y = rot.y;
+      mesh.rotation.x = rot.x;
+
+      // pulse reaction
+      if (pulse > 0.001){
+        pulse *= 0.90;
+      } else pulse = 0;
+      var s = 1 + pulse * 0.22;
+      mesh.scale.setScalar(s);
+
+      if (flash > 0.001){
+        flash *= 0.92;
+      } else flash = 0;
+      tmpColor.copy(baseColor).lerp(flashColor, flash);
+      // subtle persistent hue rotation from clicks
+      mat.color.copy(tmpColor).offsetHSL(hueShift % 1, 0, 0);
+      mat.emissiveIntensity = 0.6 + flash * 0.8;
+
+      renderer.render(scene, camera);
+    }
+
+    return { render:render, resize:resize, setVisible:function(v){ visible=v; }, isVisible:function(){return visible;} };
+  }
+
+  // ======================================================
+  //  BOOT
+  // ======================================================
+  var hero, sculpt;
+  try { hero = initHero(); } catch(e){ hero = null; }
+  try { sculpt = initSculpt(); } catch(e){ sculpt = null; }
+
+  // visibility gating for sculpt (perf)
+  var sculptInView = true;
+  if (sculpt && "IntersectionObserver" in window){
+    var stageEl = document.getElementById("sculpt");
+    if (stageEl){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){ sculptInView = en.isIntersecting; });
+      }, { threshold:0.01 });
+      io.observe(stageEl);
+    }
+  }
+
+  var heroInView = true;
+  if (hero && "IntersectionObserver" in window){
+    var heroEl = document.getElementById("hero");
+    if (heroEl){
+      var io2 = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){ heroInView = en.isIntersecting; });
+      }, { threshold:0.01 });
+      io2.observe(heroEl);
+    }
+  }
+
+  function loop(){
+    try {
+      if (hero && heroInView) hero.render();
+      if (sculpt && sculptInView) sculpt.render();
+    } catch(e){ /* never throw out of rAF */ }
+    requestAnimationFrame(loop);
+  }
+  if (hero || sculpt) requestAnimationFrame(loop);
+
+  // resize handling (debounced)
+  var rt;
+  window.addEventListener("resize", function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){
+      if (heroState && heroState.resize) try{ heroState.resize(); }catch(e){}
+      if (sculpt && sculpt.resize) try{ sculpt.resize(); }catch(e){}
+    }, 150);
+  });
+
+  // ======================================================
+  //  GSAP : scroll story
+  // ======================================================
+  function setupGSAP(){
+    if (!hasGSAP){
+      // Reveal everything statically if GSAP missing
+      document.querySelectorAll(".mask > span, .hero-eyebrow, .hero-sub, .reveal, .line-mask > .line-inner")
+        .forEach(function(el){ el.style.opacity = 1; el.style.transform = "none"; });
+      animateCountsStatic();
+      return;
+    }
+
+    // ---- Hero intro ----
+    var tl = gsap.timeline({ defaults:{ ease:"power3.out" } });
+    tl.to(".hero-eyebrow", { opacity:1, y:0, duration:.7, delay:.2 })
+      .to(".hero-title .mask > span", { y:"0%", duration:1.05, stagger:.12 }, "-=.3")
+      .to(".hero-sub", { opacity:1, y:0, duration:.8 }, "-=.5");
+
+    if (REDUCED){
+      // jump to final state, no scrub motion loops, but keep simple reveals visible
+      gsap.set(".mask > span, .hero-eyebrow, .hero-sub", { clearProps:"opacity,transform" });
+    }
+
+    if (!hasST) { animateCountsStatic(); return; }
+
+    // ---- Hero scroll scrub -> blob scale/rotate + camera ----
+    if (hero && heroState){
+      ScrollTrigger.create({
+        trigger:"#hero",
+        start:"top top",
+        end:"bottom top",
+        scrub: REDUCED ? false : 0.6,
+        onUpdate:function(self){
+          heroState.scrollProg = self.progress;
+        }
+      });
+    }
+
+    // ---- Generic fade-up reveals ----
+    gsap.utils.toArray(".reveal").forEach(function(el){
+      gsap.to(el, {
+        opacity:1, y:0, duration:.9, ease:"power3.out",
+        scrollTrigger:{ trigger:el, start:"top 85%" }
+      });
+    });
+
+    // ---- Line-mask text reveals ----
+    gsap.utils.toArray(".line-mask").forEach(function(el){
+      var inner = el.querySelector(".line-inner");
+      if (!inner) return;
+      gsap.to(inner, {
+        y:"0%", duration:1, ease:"power4.out",
+        scrollTrigger:{ trigger:el, start:"top 88%" }
+      });
+    });
+
+    // ---- Parallax band background ----
+    var band = document.getElementById("bandBg");
+    if (band){
+      gsap.fromTo(band, { yPercent:-12 }, {
+        yPercent:12, ease:"none",
+        scrollTrigger:{ trigger:".band", start:"top bottom", end:"bottom top", scrub:true }
+      });
+    }
+
+    // ---- Count-up stats ----
+    var statsEl = document.getElementById("stats");
+    if (statsEl){
+      ScrollTrigger.create({
+        trigger:statsEl, start:"top 80%", once:true,
+        onEnter: function(){ runCounts(); }
+      });
+    } else {
+      runCounts();
+    }
+  }
+
+  function runCounts(){
+    document.querySelectorAll("[data-count]").forEach(function(el){
+      var target = parseFloat(el.getAttribute("data-count")) || 0;
+      if (REDUCED || !hasGSAP){
+        el.textContent = formatCount(target);
+        return;
+      }
+      var obj = { v:0 };
+      gsap.to(obj, {
+        v:target, duration:1.8, ease:"power2.out",
+        onUpdate:function(){ el.textContent = formatCount(obj.v); }
+      });
+    });
+  }
+  function animateCountsStatic(){
+    document.querySelectorAll("[data-count]").forEach(function(el){
+      var target = parseFloat(el.getAttribute("data-count")) || 0;
+      el.textContent = formatCount(target);
+    });
+  }
+  function formatCount(v){
+    return Math.round(v).toString();
+  }
+
+  setupGSAP();
+
+  // ======================================================
+  //  Scroll progress bar (no dependency)
+  // ======================================================
+  var progressEl = document.getElementById("progress");
+  function updateProgress(){
+    var h = document.documentElement;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    var p = Math.min(1, Math.max(0, (h.scrollTop || window.pageYOffset) / max));
+    if (progressEl) progressEl.style.width = (p * 100) + "%";
+  }
+  window.addEventListener("scroll", updateProgress, { passive:true });
+  updateProgress();
+
+  // ======================================================
+  //  Custom cursor + magnetic buttons (pointer:fine only)
+  // ======================================================
+  if (FINE && !REDUCED){
+    var cur = document.getElementById("cursor");
+    var dot = document.getElementById("cursorDot");
+    var cx=0, cy=0, dx=0, dy=0, mx=0, my=0;
+    window.addEventListener("pointermove", function(e){ mx=e.clientX; my=e.clientY; }, { passive:true });
+    function curLoop(){
+      cx += (mx - cx) * 0.18;
+      cy += (my - cy) * 0.18;
+      dx += (mx - dx) * 0.5;
+      dy += (my - dy) * 0.5;
+      if (cur) cur.style.transform = "translate(" + cx + "px," + cy + "px)";
+      if (dot) dot.style.transform = "translate(" + dx + "px," + dy + "px)";
+      requestAnimationFrame(curLoop);
+    }
+    requestAnimationFrame(curLoop);
+
+    var hoverables = document.querySelectorAll("a, button, [data-magnetic], #sculptStage");
+    hoverables.forEach(function(el){
+      el.addEventListener("pointerenter", function(){ if(cur) cur.classList.add("is-active"); });
+      el.addEventListener("pointerleave", function(){ if(cur) cur.classList.remove("is-active"); });
+    });
+
+    // magnetic
+    document.querySelectorAll("[data-magnetic]").forEach(function(el){
+      el.addEventListener("pointermove", function(e){
+        var r = el.getBoundingClientRect();
+        var relX = e.clientX - (r.left + r.width/2);
+        var relY = e.clientY - (r.top + r.height/2);
+        el.style.transition = "transform .12s ease-out";
+        el.style.transform = "translate(" + (relX*0.25) + "px," + (relY*0.35) + "px)";
+      });
+      el.addEventListener("pointerleave", function(){
+        el.style.transition = "transform .35s cubic-bezier(.22,1,.36,1)";
+        el.style.transform = "translate(0,0)";
+      });
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

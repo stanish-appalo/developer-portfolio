@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CYBER-TERMINAL // Design Lab 05 — Stanish Appalo JA</title>
+<meta name="description" content="A neon cyberpunk hacker-terminal interface — matrix rain, glitch headline, live typing console and a HUD capabilities readout. Design Lab piece 05 by Stanish Appalo JA." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #04060a;
+    --bg-soft: #070b12;
+    --green: #39ff14;
+    --green-dim: #1f8a12;
+    --magenta: #ff2bd6;
+    --cyan: #00eaff;
+    --ink: #c8ffd0;
+    --muted: #4f7a56;
+    --panel: rgba(8, 16, 12, 0.72);
+    --line: rgba(57, 255, 20, 0.22);
+    --glow-green: 0 0 4px rgba(57,255,20,0.9), 0 0 14px rgba(57,255,20,0.45);
+    --mono: "Share Tech Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --display: "Orbitron", var(--mono);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--magenta); color: #04060a; }
+
+  a { color: inherit; }
+
+  /* ----- Layered backgrounds ----- */
+  #matrix {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.42;
+    display: block;
+  }
+
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(57,255,20,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57,255,20,0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 35%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 35%, #000 30%, transparent 100%);
+  }
+
+  .bg-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 70% at 50% 30%, transparent 40%, rgba(0,0,0,0.78) 100%);
+  }
+
+  /* CRT scanlines + flicker overlay */
+  .crt {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.16) 3px,
+      rgba(0,0,0,0.16) 4px
+    );
+    mix-blend-mode: multiply;
+  }
+  .crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(57,255,20,0.018);
+    animation: flicker 5.5s infinite steps(1);
+  }
+  @keyframes flicker {
+    0%, 92%, 100% { opacity: 0.5; }
+    93% { opacity: 0.85; }
+    94% { opacity: 0.25; }
+    96% { opacity: 0.7; }
+    97% { opacity: 0.4; }
+  }
+
+  /* ----- Back-to-lab control ----- */
+  .lab-bar {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 9500;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 28px);
+  }
+  .lab-back {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    color: var(--green);
+    padding: 7px 12px;
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    background: rgba(4,6,10,0.7);
+    box-shadow: var(--glow-green);
+    text-shadow: 0 0 6px rgba(57,255,20,0.7);
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    white-space: nowrap;
+  }
+  .lab-back:hover, .lab-back:focus-visible {
+    background: var(--green);
+    color: #04060a;
+    text-shadow: none;
+    outline: none;
+  }
+  .lab-tag {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--cyan);
+    text-shadow: 0 0 8px rgba(0,234,255,0.6);
+    padding: 7px 10px;
+    border: 1px dashed rgba(0,234,255,0.4);
+    border-radius: 4px;
+    background: rgba(4,6,10,0.55);
+    white-space: nowrap;
+  }
+
+  /* ----- Shell layout ----- */
+  .shell {
+    position: relative;
+    z-index: 5;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 96px 22px 40px;
+  }
+
+  /* ----- Hero ----- */
+  .hero { text-align: center; padding: 26px 0 54px; }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .hero-eyebrow .blip { color: var(--green); text-shadow: var(--glow-green); }
+
+  .glitch {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(2.4rem, 9vw, 6.4rem);
+    line-height: 0.95;
+    letter-spacing: 2px;
+    margin: 0 auto;
+    color: var(--green);
+    text-shadow: 0 0 8px rgba(57,255,20,0.55), 0 0 26px rgba(57,255,20,0.25);
+    position: relative;
+    display: inline-block;
+  }
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .glitch::before {
+    left: 2px;
+    color: var(--magenta);
+    text-shadow: -2px 0 var(--magenta);
+    clip-path: inset(0 0 60% 0);
+    animation: glitch-top 3.2s infinite linear alternate-reverse;
+  }
+  .glitch::after {
+    left: -2px;
+    color: var(--cyan);
+    text-shadow: 2px 0 var(--cyan);
+    clip-path: inset(58% 0 0 0);
+    animation: glitch-bot 2.6s infinite linear alternate-reverse;
+  }
+  @keyframes glitch-top {
+    0% { transform: translate(0,0); }
+    15% { transform: translate(-4px,-2px); }
+    16% { transform: translate(3px,1px); }
+    50% { transform: translate(0,0); }
+    72% { transform: translate(-3px,1px); }
+    73% { transform: translate(2px,-1px); }
+    100% { transform: translate(0,0); }
+  }
+  @keyframes glitch-bot {
+    0% { transform: translate(0,0); }
+    20% { transform: translate(3px,1px); }
+    21% { transform: translate(-2px,-1px); }
+    55% { transform: translate(0,0); }
+    78% { transform: translate(4px,-1px); }
+    79% { transform: translate(-3px,1px); }
+    100% { transform: translate(0,0); }
+  }
+
+  .hero-sub {
+    max-width: 620px;
+    margin: 26px auto 0;
+    color: var(--ink);
+    font-size: clamp(0.92rem, 2.4vw, 1.08rem);
+  }
+  .hero-sub .accent-m { color: var(--magenta); text-shadow: 0 0 8px rgba(255,43,214,0.5); }
+  .hero-sub .accent-c { color: var(--cyan); text-shadow: 0 0 8px rgba(0,234,255,0.5); }
+
+  .jack {
+    display: inline-block;
+    margin-top: 34px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 3px;
+    text-decoration: none;
+    color: #04060a;
+    background: var(--green);
+    padding: 16px 34px;
+    border: 1px solid var(--green);
+    border-radius: 6px;
+    box-shadow: 0 0 14px rgba(57,255,20,0.55), inset 0 0 18px rgba(255,255,255,0.18);
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .jack:hover, .jack:focus-visible {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 26px rgba(57,255,20,0.9), 0 0 48px rgba(0,234,255,0.4);
+    outline: none;
+    animation-play-state: paused;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(57,255,20,0.45), inset 0 0 18px rgba(255,255,255,0.18); }
+    50% { box-shadow: 0 0 24px rgba(57,255,20,0.85), inset 0 0 18px rgba(255,255,255,0.28); }
+  }
+
+  /* ----- Section heading ----- */
+  .sec-head {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    letter-spacing: 2px;
+    color: var(--green);
+    text-shadow: var(--glow-green);
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .sec-head .idx { color: var(--magenta); font-size: 0.8em; text-shadow: 0 0 8px rgba(255,43,214,0.5); }
+  .sec-note { color: var(--muted); font-size: 12px; letter-spacing: 1px; margin: 0 0 24px; }
+
+  /* ----- Terminal window ----- */
+  .terminal {
+    background: linear-gradient(180deg, rgba(7,13,9,0.92), rgba(4,7,5,0.92));
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 0 40px rgba(57,255,20,0.12), inset 0 0 60px rgba(57,255,20,0.04);
+    overflow: hidden;
+    margin-bottom: 70px;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(57,255,20,0.06);
+    border-bottom: 1px solid var(--line);
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
+  .dot.r { background: var(--magenta); color: var(--magenta); }
+  .dot.y { background: #ffd33d; color: #ffd33d; }
+  .dot.g { background: var(--green); color: var(--green); }
+  .term-title {
+    margin-left: 8px;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .term-title b { color: var(--cyan); font-weight: 400; }
+
+  .term-body {
+    padding: 20px 18px 26px;
+    font-size: clamp(0.8rem, 2.2vw, 0.98rem);
+    min-height: 340px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .term-body .prompt { color: var(--magenta); }
+  .term-body .path { color: var(--cyan); }
+  .term-body .cmd { color: #eafff0; }
+  .term-body .ok { color: var(--green); text-shadow: 0 0 6px rgba(57,255,20,0.4); }
+  .term-body .warn { color: #ffd33d; }
+  .term-body .dim { color: var(--muted); }
+  .term-line { display: block; }
+
+  .cursor {
+    display: inline-block;
+    width: 9px;
+    height: 1.05em;
+    background: var(--green);
+    box-shadow: var(--glow-green);
+    transform: translateY(2px);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ----- Capabilities HUD ----- */
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-bottom: 64px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--cyan), transparent);
+    opacity: 0.7;
+  }
+  .stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .stat-name {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 0.92rem;
+    letter-spacing: 2px;
+    color: var(--green);
+    text-shadow: 0 0 6px rgba(57,255,20,0.4);
+  }
+  .stat-pct {
+    font-size: 0.85rem;
+    color: var(--cyan);
+    text-shadow: 0 0 6px rgba(0,234,255,0.5);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar {
+    height: 12px;
+    background: rgba(57,255,20,0.08);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.25) 0 4px, transparent 4px 8px),
+      linear-gradient(90deg, var(--green-dim), var(--green));
+    box-shadow: 0 0 12px rgba(57,255,20,0.6);
+    transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .stat-desc { margin-top: 12px; font-size: 12px; color: var(--muted); letter-spacing: 0.4px; }
+  .stat-desc .tag { color: var(--magenta); }
+
+  /* ----- Footer console ----- */
+  .footer {
+    position: relative;
+    z-index: 5;
+    border-top: 1px solid var(--line);
+    background: rgba(4,6,10,0.82);
+    padding: 18px 22px;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .footer .live { color: var(--green); text-shadow: var(--glow-green); }
+  .footer .live .blip {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: var(--glow-green);
+    margin-right: 6px;
+    animation: blink 1.4s steps(1) infinite;
+  }
+
+  /* ----- Reduced motion ----- */
+  @media (prefers-reduced-motion: reduce) {
+    .glitch::before, .glitch::after { animation: none; }
+    .glitch::before { clip-path: inset(0 0 60% 0); }
+    .jack { animation: none; }
+    .crt::after { animation: none; opacity: 0.5; }
+    .cursor { animation: none; }
+    .footer .live .blip { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  @media (max-width: 520px) {
+    .shell { padding-top: 120px; }
+    .lab-tag { font-size: 10px; letter-spacing: 1px; }
+  }
+</style>
+</head>
+<body>
+  <canvas id="matrix" aria-hidden="true"></canvas>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-vignette" aria-hidden="true"></div>
+
+  <nav class="lab-bar">
+    <a class="lab-back" href="../index.html#lab">&larr; Back to Lab</a>
+    <span class="lab-tag">DESIGN LAB · 05 — CYBER-TERMINAL</span>
+  </nav>
+
+  <main class="shell">
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-eyebrow"><span class="blip">●</span> STANISH//OS v2.6 &nbsp;·&nbsp; SESSION SECURED &nbsp;·&nbsp; PORT 443</div>
+      <h1 class="glitch" data-text="JACK INTO THE GRID">JACK INTO THE GRID</h1>
+      <p class="hero-sub">
+        I build the systems behind the screen — <span class="accent-m">resilient back ends</span>,
+        <span class="accent-c">sharp interfaces</span>, and the automation that ties them together.
+        This is the console. Watch it run.
+      </p>
+      <a class="jack" href="../index.html#contact">JACK IN &#9656;</a>
+    </header>
+
+    <!-- TERMINAL -->
+    <section aria-label="Live console session">
+      <div class="terminal">
+        <div class="term-bar">
+          <span class="dot r"></span>
+          <span class="dot y"></span>
+          <span class="dot g"></span>
+          <span class="term-title">stanish@grid&nbsp;:&nbsp;<b>~/portfolio</b>&nbsp;— zsh — 96×30</span>
+        </div>
+        <div class="term-body" id="term" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- CAPABILITIES HUD -->
+    <section aria-label="System capabilities">
+      <h2 class="sec-head"><span class="idx">//</span> SYSTEM · CAPABILITIES</h2>
+      <p class="sec-note">REAL-TIME LOAD READOUT — core competencies, calibrated by shipped work.</p>
+      <div class="hud" id="hud">
+        <div class="stat">
+          <div class="stat-top"><span class="stat-name">FRONTEND</span><span class="stat-pct" data-target="94">0%</span></div>
+          <div class="bar"><div class="bar-fill" data-target="94"></div></div>
+          <p class="stat-desc"><span class="tag">stack:</span> React · TypeScript · canvas/WebGL · responsive systems</p>
+        </div>
+        <div class="stat">
+          <div class="stat-top"><span class="stat-name">BACKEND</span><span class="stat-pct" data-target="90">0%</span></div>
+          <div class="bar"><div class="bar-fill" data-target="90"></div></div>
+          <p class="stat-desc"><span class="tag">stack:</span> Node · Express · Postgres/Neon · REST &amp; auth</p>
+        </div>
+        <div class="stat">
+          <div class="stat-top"><span class="stat-name">3D / VISUAL</span><span class="stat-pct" data-target="78">0%</span></div>
+          <div class="bar"><div class="bar-fill" data-target="78"></div></div>
+          <p class="stat-desc"><span class="tag">stack:</span> Three.js · GSAP · shaders · motion design</p>
+        </div>
+        <div class="stat">
+          <div class="stat-top"><span class="stat-name">AUTOMATION</span><span class="stat-pct" data-target="86">0%</span></div>
+          <div class="bar"><div class="bar-fill" data-target="86"></div></div>
+          <p class="stat-desc"><span class="tag">stack:</span> CI/CD · cron jobs · uptime monitoring · scripting</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="live"><span class="blip"></span>CONNECTION LIVE — 0 errors, 0 dropped packets</span>
+    <span>STANISH APPALO JA · full-stack dev · <span id="clock">--:--:--</span> UTC</span>
+  </footer>
+
+<script>
+(function () {
+  "use strict";
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* =========================================================
+     1. MATRIX RAIN — vanilla canvas, throttled & responsive
+     ========================================================= */
+  (function matrixRain() {
+    var canvas = document.getElementById("matrix");
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext("2d");
+    var glyphs = "アカサタナハマヤラワ0123456789ＡＢＣＤＥＦ<>=/*+-".split("");
+    var fontSize = 16;
+    var columns = 0;
+    var drops = [];
+    var w = 0, h = 0, dpr = 1;
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      columns = Math.ceil(w / fontSize);
+      drops = new Array(columns);
+      for (var i = 0; i < columns; i++) {
+        drops[i] = Math.floor(Math.random() * -50);
+      }
+    }
+
+    function drawStatic() {
+      ctx.fillStyle = "#04060a";
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = fontSize + "px 'Share Tech Mono', monospace";
+      for (var i = 0; i < columns; i++) {
+        for (var j = 0; j < h / fontSize; j += 3) {
+          if (Math.random() > 0.82) {
+            ctx.fillStyle = "rgba(57,255,20,0.35)";
+            ctx.fillText(
+              glyphs[Math.floor(Math.random() * glyphs.length)],
+              i * fontSize,
+              j * fontSize
+            );
+          }
+        }
+      }
+    }
+
+    var last = 0;
+    var interval = 55; // ms between frames -> throttle
+    function draw(now) {
+      requestAnimationFrame(draw);
+      if (now - last < interval) return;
+      last = now;
+
+      ctx.fillStyle = "rgba(4,6,10,0.09)";
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = fontSize + "px 'Share Tech Mono', monospace";
+
+      for (var i = 0; i < columns; i++) {
+        var ch = glyphs[Math.floor(Math.random() * glyphs.length)];
+        var x = i * fontSize;
+        var y = drops[i] * fontSize;
+        // lead glyph brighter
+        if (Math.random() > 0.975) {
+          ctx.fillStyle = "rgba(220,255,225,0.95)";
+        } else {
+          ctx.fillStyle = "rgba(57,255,20,0.78)";
+        }
+        if (y > 0) ctx.fillText(ch, x, y);
+        if (y > h && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    var resizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    });
+
+    resize();
+    if (reduceMotion) {
+      drawStatic();
+    } else {
+      requestAnimationFrame(draw);
+    }
+  })();
+
+  /* =========================================================
+     2. TERMINAL TYPEWRITER — believable looped session
+     ========================================================= */
+  (function terminal() {
+    var el = document.getElementById("term");
+    if (!el) return;
+
+    var P = '<span class="prompt">stanish@grid</span>:<span class="path">~/portfolio</span>$ ';
+
+    // Each step: type a command, then print response lines instantly.
+    var script = [
+      { cmd: "whoami", out: [
+        '<span class="ok">Stanish Appalo JA</span> — full-stack developer',
+        '<span class="dim">role: builds web apps end-to-end · learning relentlessly</span>'
+      ]},
+      { cmd: "cat ./stack.json", out: [
+        '{',
+        '  "frontend":  ["React", "TypeScript", "canvas"],',
+        '  "backend":   ["Node", "Express", "Postgres"],',
+        '  "infra":     ["Render", "Neon", "CI/CD cron"]',
+        '}'
+      ]},
+      { cmd: "./deploy --target=production", out: [
+        '<span class="dim">› bundling assets................</span> <span class="ok">done</span>',
+        '<span class="dim">› running tests (42 passed)......</span> <span class="ok">done</span>',
+        '<span class="dim">› pushing to edge nodes.........</span> <span class="ok">done</span>',
+        '<span class="ok">✓ live in 11.4s</span> — <span class="path">https://stanish.dev</span>'
+      ]},
+      { cmd: "uptime --service=monitor", out: [
+        '<span class="ok">UP</span> 247 days · <span class="warn">99.98%</span> · 0 incidents this quarter'
+      ]},
+      { cmd: "echo $MISSION", out: [
+        '"Ship clean, reliable software — and make it look like the future."'
+      ]},
+      { cmd: "open ../index.html#contact", out: [
+        '<span class="ok">▸ channel open.</span> <span class="dim">Ready to build something. JACK IN above.</span>'
+      ]}
+    ];
+
+    var lines = [];     // committed HTML lines
+    var MAX_LINES = 16; // keep the window from growing unbounded
+    var typingHTML = "";
+    var step = 0, ci = 0;
+
+    function render(showCursor) {
+      var html = lines.join("\n");
+      if (typingHTML) html += (html ? "\n" : "") + typingHTML;
+      if (showCursor) html += '<span class="cursor"></span>';
+      el.innerHTML = html;
+    }
+
+    function pushLine(html) {
+      lines.push(html);
+      while (lines.length > MAX_LINES) lines.shift();
+    }
+
+    function typeCmd() {
+      var full = script[step].cmd;
+      if (ci <= full.length) {
+        typingHTML = P + '<span class="cmd">' + full.slice(0, ci) + "</span>";
+        render(true);
+        ci++;
+        setTimeout(typeCmd, 38 + Math.random() * 55);
+      } else {
+        pushLine(typingHTML);
+        typingHTML = "";
+        setTimeout(printOut, 260);
+      }
+    }
+
+    function printOut() {
+      var out = script[step].out;
+      for (var i = 0; i < out.length; i++) pushLine(out[i]);
+      pushLine(""); // spacer
+      render(true);
+      step = (step + 1) % script.length;
+      ci = 0;
+      if (step === 0) {
+        // clear after a full loop for a fresh session feel
+        setTimeout(function () {
+          lines = [];
+          pushLine('<span class="dim"># new session — booting STANISH//OS…</span>');
+          pushLine("");
+          render(true);
+          setTimeout(typeCmd, 700);
+        }, 2200);
+      } else {
+        setTimeout(typeCmd, 900);
+      }
+    }
+
+    if (reduceMotion) {
+      // Static, fully-rendered session — no looping animation.
+      script.forEach(function (s) {
+        pushLine(P + '<span class="cmd">' + s.cmd + "</span>");
+        s.out.forEach(function (o) { pushLine(o); });
+        pushLine("");
+      });
+      // keep all lines visible in static mode
+      el.innerHTML = lines.join("\n") + '<span class="cursor" style="animation:none"></span>';
+    } else {
+      pushLine('<span class="dim"># booting STANISH//OS v2.6…</span>');
+      pushLine("");
+      render(true);
+      setTimeout(typeCmd, 900);
+    }
+  })();
+
+  /* =========================================================
+     3. CAPABILITIES HUD — animated stat bars (on view)
+     ========================================================= */
+  (function hud() {
+    var hudEl = document.getElementById("hud");
+    if (!hudEl) return;
+    var fills = hudEl.querySelectorAll(".bar-fill");
+    var pcts = hudEl.querySelectorAll(".stat-pct");
+
+    function fill() {
+      fills.forEach(function (f) {
+        f.style.width = (f.getAttribute("data-target") || 0) + "%";
+      });
+      pcts.forEach(function (p) {
+        var target = parseInt(p.getAttribute("data-target"), 10) || 0;
+        if (reduceMotion) { p.textContent = target + "%"; return; }
+        var n = 0;
+        var stepSize = Math.max(1, Math.round(target / 28));
+        var t = setInterval(function () {
+          n += stepSize;
+          if (n >= target) { n = target; clearInterval(t); }
+          p.textContent = n + "%";
+        }, 40);
+      });
+    }
+
+    if ("IntersectionObserver" in window && !reduceMotion) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { fill(); io.disconnect(); }
+        });
+      }, { threshold: 0.3 });
+      io.observe(hudEl);
+    } else {
+      fill();
+    }
+  })();
+
+  /* =========================================================
+     4. FOOTER CLOCK (UTC)
+     ========================================================= */
+  (function clock() {
+    var c = document.getElementById("clock");
+    if (!c) return;
+    function tick() {
+      var d = new Date();
+      function pad(n) { return (n < 10 ? "0" : "") + n; }
+      c.textContent = pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds());
+    }
+    tick();
+    if (!reduceMotion) setInterval(tick, 1000);
+  })();
+
+  /* =========================================================
+     5. Optional GSAP hero entrance (guarded feature check)
+     ========================================================= */
+  if (!reduceMotion && window.gsap && typeof window.gsap.from === "function") {
+    try {
+      window.gsap.from(".hero-eyebrow, .glitch, .hero-sub, .jack", {
+        y: 18, opacity: 0, duration: 0.7, stagger: 0.12, ease: "power3.out"
+      });
+    } catch (e) { /* non-fatal: page works without GSAP */ }
+  }
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+</body>
+</html>

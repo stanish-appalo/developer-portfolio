@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive 3D — Design Lab · 02</title>
+<meta name="description" content="A dark, glossy, real-time interactive 3D hero built with vanilla Three.js. Part of the Design Lab." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-0: #0a0a0c;
+    --bg-1: #101015;
+    --bg-2: #16161d;
+    --ink: #f4f4f6;
+    --ink-soft: #b9bac4;
+    --ink-faint: #6f7079;
+    --accent: #6e8bff;
+    --accent-soft: rgba(110, 139, 255, 0.16);
+    --line: rgba(255, 255, 255, 0.08);
+    --radius: 16px;
+    --maxw: 1280px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg-0);
+    color: var(--ink);
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Layered dark gradient backdrop */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(1100px 800px at 78% 8%, rgba(110, 139, 255, 0.12), transparent 60%),
+      radial-gradient(900px 700px at 12% 95%, rgba(110, 139, 255, 0.06), transparent 55%),
+      linear-gradient(160deg, #0c0c10 0%, #0a0a0c 45%, #08080a 100%);
+  }
+
+  /* Soft global vignette */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  }
+
+  .mono {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- Fixed top-left controls ---------- */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px clamp(16px, 4vw, 40px);
+    pointer-events: none;
+  }
+  .topbar > * { pointer-events: auto; }
+
+  .back-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: rgba(20, 20, 26, 0.6);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: color 0.25s var(--ease), border-color 0.25s var(--ease), transform 0.25s var(--ease), background 0.25s var(--ease);
+  }
+  .back-pill:hover {
+    color: var(--ink);
+    border-color: rgba(110, 139, 255, 0.5);
+    background: rgba(26, 26, 34, 0.8);
+    transform: translateX(-2px);
+  }
+
+  .lab-label { white-space: nowrap; }
+  @media (max-width: 560px) { .lab-label { display: none; } }
+
+  /* ---------- Layout ---------- */
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 5;
+    padding: clamp(80px, 12vh, 140px) clamp(16px, 4vw, 64px) clamp(40px, 8vh, 80px) clamp(16px, 5vw, 80px);
+    max-width: 640px;
+    margin-left: auto;
+    width: 100%;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+  .eyebrow .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px 1px var(--accent);
+  }
+
+  .hero h1 {
+    font-size: clamp(3.2rem, 9vw, 6.4rem);
+    font-weight: 600;
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin-bottom: 26px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(180deg, #ffffff 0%, #b9bac4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero h1 .grad.accent {
+    background: linear-gradient(120deg, #8aa0ff 0%, #6e8bff 60%, #aab6ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero p.lede {
+    font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+    color: var(--ink-soft);
+    max-width: 46ch;
+    margin-bottom: 38px;
+    font-weight: 400;
+  }
+
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: #0a0a0c;
+    box-shadow: 0 10px 30px -10px rgba(244, 244, 246, 0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -12px rgba(244, 244, 246, 0.45); }
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn-ghost:hover { border-color: rgba(110, 139, 255, 0.5); background: rgba(110, 139, 255, 0.08); transform: translateY(-2px); }
+  .btn .arrow { transition: transform 0.25s var(--ease); }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  /* ---------- 3D Stage ---------- */
+  .stage {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  #scene-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  #scene-canvas.dragging { cursor: grabbing; }
+
+  .stage-hint {
+    position: absolute;
+    bottom: clamp(20px, 4vh, 40px);
+    right: clamp(20px, 4vw, 48px);
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.7;
+  }
+  .stage-hint .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2.4s var(--ease) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* fallback poster shown if WebGL/Three unavailable */
+  .stage-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .stage-fallback .orb {
+    width: clamp(180px, 32vw, 380px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, #aab6ff 0%, #6e8bff 28%, #2a3470 62%, #0c0c14 100%);
+    box-shadow: 0 40px 120px -30px rgba(110, 139, 255, 0.6), inset -20px -30px 80px rgba(0,0,0,0.6);
+    filter: saturate(1.1);
+  }
+
+  /* ---------- Scroll cue ---------- */
+  .scroll-cue {
+    position: absolute;
+    bottom: 24px;
+    left: clamp(16px, 5vw, 80px);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .scroll-cue .track {
+    width: 1px; height: 46px;
+    background: linear-gradient(180deg, var(--accent), transparent);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-cue .track::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 14px;
+    background: var(--accent);
+    animation: cueDrop 2.2s var(--ease) infinite;
+  }
+  @keyframes cueDrop { 0% { transform: translateY(-14px); } 60%,100% { transform: translateY(46px); } }
+
+  /* ---------- Sections ---------- */
+  section.band { position: relative; padding: clamp(80px, 14vh, 150px) 0; }
+
+  .section-head { max-width: 720px; margin-bottom: clamp(40px, 6vh, 72px); }
+  .section-head .mono { display: inline-block; margin-bottom: 16px; }
+  .section-head h2 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+  .section-head p {
+    margin-top: 18px;
+    color: var(--ink-soft);
+    font-size: clamp(1rem, 1.4vw, 1.12rem);
+    max-width: 54ch;
+  }
+
+  /* feature row */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .feature-card {
+    position: relative;
+    padding: 30px 28px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+    overflow: hidden;
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+  }
+  .feature-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(400px 200px at var(--mx, 50%) var(--my, 0%), var(--accent-soft), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+    pointer-events: none;
+  }
+  .feature-card:hover { transform: translateY(-5px); border-color: rgba(110, 139, 255, 0.35); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-card .ico {
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(110, 139, 255, 0.25);
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .feature-card p { color: var(--ink-soft); font-size: 0.96rem; }
+  .feature-card .tag { margin-top: 18px; font-size: 0.72rem; }
+
+  /* stats / second 3D moment */
+  .showcase {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(28px, 5vw, 64px);
+    align-items: center;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .stat {
+    background: var(--bg-1);
+    padding: 30px 26px;
+  }
+  .stat .num {
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    background: linear-gradient(120deg, #fff, #8aa0ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .stat .lbl { margin-top: 12px; color: var(--ink-soft); font-size: 0.92rem; }
+
+  .mini-stage {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: radial-gradient(120% 120% at 50% 0%, rgba(110,139,255,0.1), transparent 60%), var(--bg-1);
+    min-height: 280px;
+  }
+  #mini-canvas { display: block; width: 100%; height: 100%; }
+  .mini-cap {
+    position: absolute; left: 18px; bottom: 16px; z-index: 2;
+  }
+
+  /* CTA */
+  .cta {
+    position: relative;
+    text-align: center;
+    padding: clamp(70px, 12vh, 130px) 0;
+    border-top: 1px solid var(--line);
+  }
+  .cta .mono { margin-bottom: 22px; display: inline-block; }
+  .cta h2 {
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    margin-bottom: 30px;
+  }
+  .cta h2 .accent {
+    background: linear-gradient(120deg, #8aa0ff, #6e8bff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 34px clamp(16px, 4vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer .mono { font-size: 0.68rem; }
+
+  /* ---------- Reveal animation ---------- */
+  .reveal { opacity: 0; transform: translateY(26px); }
+  .is-in { opacity: 1; transform: none; transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+
+  /* hero text staged entrance (driven by JS when ready) */
+  .hero-stage > * { opacity: 0; transform: translateY(22px); }
+  .hero-stage.ready > * { opacity: 1; transform: none; transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+  .hero-stage.ready > *:nth-child(1) { transition-delay: 0.05s; }
+  .hero-stage.ready > *:nth-child(2) { transition-delay: 0.15s; }
+  .hero-stage.ready > *:nth-child(3) { transition-delay: 0.27s; }
+  .hero-stage.ready > *:nth-child(4) { transition-delay: 0.39s; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 920px) {
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .stage {
+      position: relative;
+      inset: auto;
+      order: -1;
+      width: 100%;
+      height: 56vh;
+      min-height: 360px;
+    }
+    .hero-copy {
+      margin-left: 0;
+      padding-top: clamp(28px, 5vh, 48px);
+      padding-bottom: clamp(50px, 8vh, 90px);
+      max-width: 100%;
+    }
+    .scroll-cue { display: none; }
+    .showcase { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 540px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .hero-actions .btn { flex: 1 1 auto; justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; }
+    .hero-stage > * { opacity: 1; transform: none; }
+    .scroll-cue .track::after, .stage-hint .pulse { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Fixed controls -->
+  <div class="topbar">
+    <a class="back-pill" href="../index.html#lab" aria-label="Back to Lab">
+      <span aria-hidden="true">←</span> Back to Lab
+    </a>
+    <span class="lab-label mono">Design Lab · 02 — Interactive 3D</span>
+  </div>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="stage" aria-hidden="true">
+      <canvas id="scene-canvas"></canvas>
+      <div class="stage-fallback" id="stage-fallback"><div class="orb"></div></div>
+      <div class="stage-hint">
+        <span class="pulse"></span>
+        <span class="mono" id="hint-text">Move · Drag to spin</span>
+      </div>
+    </div>
+
+    <div class="hero-copy">
+      <div class="hero-stage" id="hero-stage">
+        <div class="eyebrow">
+          <span class="dot"></span>
+          <span class="mono">Real-time WebGL Scene</span>
+        </div>
+        <h1>
+          <span class="grad">Interactive</span><br />
+          <span class="grad accent">3D</span>
+        </h1>
+        <p class="lede">
+          Bring your UI to life with beautiful 3D scenes. Create immersive
+          experiences that capture attention and enhance your design.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contact">
+            Put 3D in your product <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn-ghost" href="#features">See how it works</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-cue" aria-hidden="true">
+      <span class="track"></span>
+      <span class="mono">Scroll</span>
+    </div>
+  </header>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section class="band" id="features">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="mono">What you get</span>
+        <h2>Real-time · Reactive · Reusable</h2>
+        <p>
+          Every scene is rendered live in the browser — no video, no pre-baked
+          frames. It reacts to the cursor, respects motion preferences, and
+          drops into any product as a self-contained component.
+        </p>
+      </div>
+
+      <div class="features">
+        <div class="feature-card reveal">
+          <div class="ico" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 11-13h-7l1-7z"/></svg>
+          </div>
+          <h3>Real-time</h3>
+          <p>Rendered at 60fps with WebGL. Lighting, reflections and motion are computed live, frame by frame, on the GPU.</p>
+          <div class="tag mono">~60 FPS · GPU</div>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="ico" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/><circle cx="12" cy="12" r="2.5"/></svg>
+          </div>
+          <h3>Reactive</h3>
+          <p>The centerpiece tracks the cursor, floats gently, and spins with inertia on drag — premium feel, zero jank.</p>
+          <div class="tag mono">Pointer · Inertia</div>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="ico" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+          </div>
+          <h3>Reusable</h3>
+          <p>One self-contained file. No build step, graceful fallbacks, and full support for reduced-motion and touch devices.</p>
+          <div class="tag mono">Drop-in · A11y</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SHOWCASE / STATS ===================== -->
+  <section class="band" id="showcase">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="mono">Built to perform</span>
+        <h2>A second moment, just as glossy.</h2>
+      </div>
+
+      <div class="showcase">
+        <div class="stat-grid reveal">
+          <div class="stat">
+            <div class="num" data-count="60" data-suffix="">60</div>
+            <div class="lbl">Frames per second target</div>
+          </div>
+          <div class="stat">
+            <div class="num" data-count="1" data-suffix="">1</div>
+            <div class="lbl">Self-contained HTML file</div>
+          </div>
+          <div class="stat">
+            <div class="num" data-count="0" data-suffix=" kb">0</div>
+            <div class="lbl">Local assets to ship</div>
+          </div>
+          <div class="stat">
+            <div class="num" data-count="100" data-suffix="%">100</div>
+            <div class="lbl">Vanilla — no framework</div>
+          </div>
+        </div>
+
+        <div class="mini-stage reveal" aria-hidden="true">
+          <canvas id="mini-canvas"></canvas>
+          <div class="mini-cap mono">Polished metal · Live reflections</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA ===================== -->
+  <section class="cta" id="contact">
+    <div class="wrap">
+      <span class="mono reveal">Let's build something dimensional</span>
+      <h2 class="reveal">Put 3D in <span class="accent">your product.</span></h2>
+      <div class="reveal" style="display:flex; justify-content:center;">
+        <a class="btn btn-primary" href="../index.html#contact">
+          Start a conversation <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="mono">Design Lab · 02 — Interactive 3D</span>
+    <span class="mono">Stanish Appalo JA · Vanilla Three.js</span>
+  </footer>
+
+  <!-- ===================== LIBRARIES ===================== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var prefersReduced = false;
+    try {
+      prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) { prefersReduced = false; }
+
+    var isTouch = false;
+    try {
+      isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) ||
+        (window.matchMedia && window.matchMedia("(hover: none)").matches);
+    } catch (e) { isTouch = false; }
+
+    var hasThree = (typeof THREE !== "undefined");
+    var hasGSAP = (typeof gsap !== "undefined");
+
+    // -------- Hero text entrance (works with or without GSAP) --------
+    function revealHeroText() {
+      var stage = document.getElementById("hero-stage");
+      if (stage) stage.classList.add("ready");
+    }
+
+    // -------- Scroll reveals --------
+    function setupReveals() {
+      var items = document.querySelectorAll(".reveal");
+      if (prefersReduced || !("IntersectionObserver" in window)) {
+        items.forEach(function (el) { el.classList.add("is-in"); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            en.target.classList.add("is-in");
+            io.unobserve(en.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+      items.forEach(function (el) { io.observe(el); });
+    }
+
+    // -------- Animated stat counters --------
+    function setupCounters() {
+      var nums = document.querySelectorAll(".num[data-count]");
+      if (!nums.length) return;
+      if (prefersReduced || !("IntersectionObserver" in window)) {
+        nums.forEach(function (n) {
+          n.textContent = n.getAttribute("data-count") + (n.getAttribute("data-suffix") || "");
+        });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          var el = en.target;
+          io.unobserve(el);
+          var target = parseFloat(el.getAttribute("data-count")) || 0;
+          var suffix = el.getAttribute("data-suffix") || "";
+          var start = null, dur = 1200;
+          function step(ts) {
+            if (start === null) start = ts;
+            var p = Math.min((ts - start) / dur, 1);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * eased) + suffix;
+            if (p < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        });
+      }, { threshold: 0.5 });
+      nums.forEach(function (n) { io.observe(n); });
+    }
+
+    // -------- Feature card cursor glow --------
+    function setupCardGlow() {
+      if (isTouch) return;
+      var cards = document.querySelectorAll(".feature-card");
+      cards.forEach(function (card) {
+        card.addEventListener("mousemove", function (e) {
+          var r = card.getBoundingClientRect();
+          card.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+          card.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+        });
+      });
+    }
+
+    // ============================================================
+    //  THREE.JS HERO SCENE
+    // ============================================================
+    function showFallback() {
+      var fb = document.getElementById("stage-fallback");
+      if (fb) fb.style.display = "flex";
+      var canvas = document.getElementById("scene-canvas");
+      if (canvas) canvas.style.display = "none";
+    }
+
+    function initHeroScene() {
+      var canvas = document.getElementById("scene-canvas");
+      if (!canvas || !hasThree) { showFallback(); return; }
+
+      var renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance"
+        });
+      } catch (e) { showFallback(); return; }
+
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+      if (THREE.ACESFilmicToneMapping) {
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.05;
+      }
+
+      var stageEl = canvas.parentElement;
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+      camera.position.set(0, 0, 8.4);
+
+      // ---------- Environment map for real reflections ----------
+      var envMap = null;
+      try {
+        if (THREE.PMREMGenerator && THREE.RoomEnvironment) {
+          var pmrem = new THREE.PMREMGenerator(renderer);
+          pmrem.compileEquirectangularShader && pmrem.compileEquirectangularShader();
+          var roomEnv = new THREE.RoomEnvironment();
+          envMap = pmrem.fromScene(roomEnv, 0.04).texture;
+          scene.environment = envMap;
+          if (roomEnv.dispose) roomEnv.dispose();
+          pmrem.dispose();
+        }
+      } catch (e) { envMap = null; }
+
+      // ---------- Lights (always present, so it reads glossy even w/o env) ----------
+      var amb = new THREE.AmbientLight(0x8089b3, 0.55);
+      scene.add(amb);
+
+      var key = new THREE.DirectionalLight(0xffffff, 2.4);
+      key.position.set(5, 6, 7);
+      scene.add(key);
+
+      var rimBlue = new THREE.DirectionalLight(0x6e8bff, 2.6);
+      rimBlue.position.set(-7, 2, -3);
+      scene.add(rimBlue);
+
+      var fillWarm = new THREE.DirectionalLight(0xffd8b0, 1.0);
+      fillWarm.position.set(2, -5, 4);
+      scene.add(fillWarm);
+
+      var topLight = new THREE.DirectionalLight(0xbcd0ff, 1.2);
+      topLight.position.set(0, 8, -2);
+      scene.add(topLight);
+
+      // ---------- The centerpiece: polished torus knot ----------
+      var group = new THREE.Group();
+      scene.add(group);
+
+      var geo = new THREE.TorusKnotGeometry(1.45, 0.46, 240, 36, 2, 3);
+      var mat = new THREE.MeshStandardMaterial({
+        color: 0xc9d2ff,
+        metalness: 0.92,
+        roughness: 0.16,
+        envMap: envMap || null,
+        envMapIntensity: envMap ? 1.15 : 0.0
+      });
+      var knot = new THREE.Mesh(geo, mat);
+      group.add(knot);
+
+      // Subtle inner emissive accent core for glow without postprocessing
+      var coreGeo = new THREE.IcosahedronGeometry(0.62, 2);
+      var coreMat = new THREE.MeshStandardMaterial({
+        color: 0x6e8bff, emissive: 0x4860ff, emissiveIntensity: 1.4,
+        metalness: 0.2, roughness: 0.4, transparent: true, opacity: 0.9
+      });
+      var core = new THREE.Mesh(coreGeo, coreMat);
+      group.add(core);
+
+      // ---------- Additive glow sprite (bloom-like) ----------
+      function makeGlowTexture() {
+        var c = document.createElement("canvas");
+        c.width = c.height = 128;
+        var g = c.getContext("2d");
+        var grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+        grd.addColorStop(0, "rgba(140,160,255,0.9)");
+        grd.addColorStop(0.35, "rgba(110,139,255,0.35)");
+        grd.addColorStop(1, "rgba(110,139,255,0)");
+        g.fillStyle = grd;
+        g.fillRect(0, 0, 128, 128);
+        var t = new THREE.CanvasTexture(c);
+        if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding;
+        return t;
+      }
+      var glowSprite = null;
+      try {
+        var glowMat = new THREE.SpriteMaterial({
+          map: makeGlowTexture(), color: 0x6e8bff,
+          blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0.7
+        });
+        glowSprite = new THREE.Sprite(glowMat);
+        glowSprite.scale.set(7, 7, 1);
+        glowSprite.position.set(0, 0, -1.5);
+        scene.add(glowSprite);
+      } catch (e) { glowSprite = null; }
+
+      // ---------- Floating particles for depth ----------
+      var particles = null;
+      try {
+        var pCount = 140;
+        var pGeo = new THREE.BufferGeometry();
+        var pos = new Float32Array(pCount * 3);
+        for (var i = 0; i < pCount; i++) {
+          pos[i * 3]     = (Math.random() - 0.5) * 18;
+          pos[i * 3 + 1] = (Math.random() - 0.5) * 12;
+          pos[i * 3 + 2] = (Math.random() - 0.5) * 10 - 2;
+        }
+        pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        var pMat = new THREE.PointsMaterial({
+          color: 0x9aa8ff, size: 0.035, transparent: true, opacity: 0.55,
+          blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
+      } catch (e) { particles = null; }
+
+      // ---------- Interaction state ----------
+      var targetRotX = 0, targetRotY = 0;
+      var velX = 0, velY = 0;          // drag inertia
+      var isDragging = false;
+      var lastX = 0, lastY = 0;
+      var pointerX = 0, pointerY = 0;  // normalized -1..1
+      var hasPointer = false;
+
+      function setSize() {
+        var w = stageEl.clientWidth || window.innerWidth;
+        var h = stageEl.clientHeight || window.innerHeight;
+        if (w === 0 || h === 0) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        // scale model on narrow viewports so it isn't cropped
+        var scale = Math.min(1, Math.max(0.62, w / 760));
+        group.scale.setScalar(scale);
+        camera.updateProjectionMatrix();
+      }
+      setSize();
+      window.addEventListener("resize", setSize);
+
+      // pointer tracking (desktop only — touch auto-rotates)
+      if (!isTouch) {
+        window.addEventListener("mousemove", function (e) {
+          hasPointer = true;
+          pointerX = (e.clientX / window.innerWidth) * 2 - 1;
+          pointerY = (e.clientY / window.innerHeight) * 2 - 1;
+        });
+
+        canvas.addEventListener("mousedown", function (e) {
+          isDragging = true; canvas.classList.add("dragging");
+          lastX = e.clientX; lastY = e.clientY;
+        });
+        window.addEventListener("mouseup", function () {
+          isDragging = false; canvas.classList.remove("dragging");
+        });
+        window.addEventListener("mousemove", function (e) {
+          if (!isDragging) return;
+          var dx = e.clientX - lastX;
+          var dy = e.clientY - lastY;
+          lastX = e.clientX; lastY = e.clientY;
+          velY = dx * 0.005;
+          velX = dy * 0.005;
+          targetRotY += velY;
+          targetRotX += velX;
+        });
+      } else {
+        var hint = document.getElementById("hint-text");
+        if (hint) hint.textContent = "Auto-rotating";
+      }
+
+      // touch drag (works for everyone, additive)
+      canvas.addEventListener("touchstart", function (e) {
+        if (!e.touches.length) return;
+        isDragging = true;
+        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+      }, { passive: true });
+      canvas.addEventListener("touchmove", function (e) {
+        if (!isDragging || !e.touches.length) return;
+        var dx = e.touches[0].clientX - lastX;
+        var dy = e.touches[0].clientY - lastY;
+        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+        velY = dx * 0.005; velX = dy * 0.005;
+        targetRotY += velY; targetRotX += velX;
+      }, { passive: true });
+      canvas.addEventListener("touchend", function () { isDragging = false; });
+
+      // ---------- Render loop ----------
+      var clock = new THREE.Clock();
+      var running = true;
+      var paused = false;
+
+      // pause when offscreen to save battery
+      if ("IntersectionObserver" in window) {
+        var visIO = new IntersectionObserver(function (ents) {
+          paused = !ents[0].isIntersecting;
+        }, { threshold: 0 });
+        visIO.observe(stageEl);
+      }
+
+      function animate() {
+        if (!running) return;
+        requestAnimationFrame(animate);
+        if (paused) return;
+
+        var t = clock.getElapsedTime();
+
+        if (prefersReduced) {
+          // Show a calm, final-ish state, no looping spin
+          group.rotation.x = -0.18;
+          group.rotation.y = 0.5;
+        } else if (isTouch) {
+          // auto-rotate on touch + any drag inertia
+          targetRotY += 0.0045;
+          targetRotX += velX;
+          velX *= 0.94; velY *= 0.94;
+          group.rotation.y += (targetRotY - group.rotation.y) * 0.08;
+          group.rotation.x += (targetRotX - group.rotation.x) * 0.08;
+          group.position.y = Math.sin(t * 0.8) * 0.12;
+        } else {
+          if (!isDragging) {
+            // gentle auto drift toward cursor
+            if (hasPointer) {
+              targetRotY += ((pointerX * 0.9) - targetRotY) * 0.02 + 0.0016;
+              targetRotX += ((pointerY * 0.5) - targetRotX) * 0.02;
+            } else {
+              targetRotY += 0.003;
+            }
+            // apply inertia decay
+            targetRotY += velY; targetRotX += velX;
+            velX *= 0.92; velY *= 0.92;
+          }
+          group.rotation.y += (targetRotY - group.rotation.y) * 0.07;
+          group.rotation.x += (targetRotX - group.rotation.x) * 0.07;
+          group.position.y = Math.sin(t * 0.8) * 0.14;
+        }
+
+        // core counter-rotates + breathes
+        if (!prefersReduced) {
+          core.rotation.x = -t * 0.3;
+          core.rotation.y = t * 0.22;
+          var pulse = 1 + Math.sin(t * 1.6) * 0.06;
+          core.scale.setScalar(pulse);
+          coreMat.emissiveIntensity = 1.2 + Math.sin(t * 1.6) * 0.5;
+          if (glowSprite) glowSprite.material.opacity = 0.55 + Math.sin(t * 1.6) * 0.18;
+          if (particles) particles.rotation.y = t * 0.02;
+        }
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // graceful cleanup hook (not strictly required but tidy)
+      window.addEventListener("pagehide", function () { running = false; });
+    }
+
+    // ============================================================
+    //  MINI SHOWCASE SCENE (second 3D moment)
+    // ============================================================
+    function initMiniScene() {
+      var canvas = document.getElementById("mini-canvas");
+      if (!canvas || !hasThree) return;
+
+      var renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      } catch (e) { return; }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+      if (THREE.ACESFilmicToneMapping) {
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+      }
+
+      var wrap = canvas.parentElement;
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+      camera.position.set(0, 0, 6);
+
+      var envMap = null;
+      try {
+        if (THREE.PMREMGenerator && THREE.RoomEnvironment) {
+          var pmrem = new THREE.PMREMGenerator(renderer);
+          var roomEnv = new THREE.RoomEnvironment();
+          envMap = pmrem.fromScene(roomEnv, 0.04).texture;
+          scene.environment = envMap;
+          if (roomEnv.dispose) roomEnv.dispose();
+          pmrem.dispose();
+        }
+      } catch (e) { envMap = null; }
+
+      scene.add(new THREE.AmbientLight(0x8089b3, 0.6));
+      var l1 = new THREE.DirectionalLight(0xffffff, 2.2); l1.position.set(4, 5, 5); scene.add(l1);
+      var l2 = new THREE.DirectionalLight(0x6e8bff, 2.4); l2.position.set(-5, 1, -2); scene.add(l2);
+      var l3 = new THREE.DirectionalLight(0xffd8b0, 0.9); l3.position.set(1, -4, 3); scene.add(l3);
+
+      var geo = new THREE.IcosahedronGeometry(1.7, 0);
+      var mat = new THREE.MeshStandardMaterial({
+        color: 0xdfe5ff, metalness: 0.95, roughness: 0.12,
+        envMap: envMap || null, envMapIntensity: envMap ? 1.1 : 0.0, flatShading: true
+      });
+      var shape = new THREE.Mesh(geo, mat);
+      scene.add(shape);
+
+      function setSize() {
+        var w = wrap.clientWidth, h = wrap.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+      }
+      setSize();
+      window.addEventListener("resize", setSize);
+
+      var clock = new THREE.Clock();
+      var paused = false, running = true;
+      if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (e) { paused = !e[0].isIntersecting; }, { threshold: 0 });
+        io.observe(wrap);
+      }
+
+      function loop() {
+        if (!running) return;
+        requestAnimationFrame(loop);
+        if (paused) return;
+        var t = clock.getElapsedTime();
+        if (prefersReduced) {
+          shape.rotation.set(0.4, 0.6, 0);
+        } else {
+          shape.rotation.x = t * 0.25;
+          shape.rotation.y = t * 0.35;
+          shape.position.y = Math.sin(t * 0.9) * 0.1;
+        }
+        renderer.render(scene, camera);
+      }
+      loop();
+      window.addEventListener("pagehide", function () { running = false; });
+    }
+
+    // ============================================================
+    //  BOOT
+    // ============================================================
+    function boot() {
+      try { revealHeroText(); } catch (e) {}
+      try { setupReveals(); } catch (e) {}
+      try { setupCounters(); } catch (e) {}
+      try { setupCardGlow(); } catch (e) {}
+      try { initHeroScene(); } catch (e) { showFallback(); }
+      try { initMiniScene(); } catch (e) {}
+
+      // GSAP ScrollTrigger: subtle parallax on hero copy (optional, guarded)
+      if (hasGSAP && !prefersReduced && typeof ScrollTrigger !== "undefined") {
+        try {
+          gsap.registerPlugin(ScrollTrigger);
+          gsap.to(".hero-copy", {
+            yPercent: 12, ease: "none",
+            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+          });
+        } catch (e) {}
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", boot);
+    } else {
+      boot();
+    }
+  })();
+  </script>
+</body>
+</html>
