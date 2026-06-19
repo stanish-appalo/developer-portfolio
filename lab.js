@@ -173,7 +173,7 @@
       .to("[data-tv-lead]", { opacity: 0, y: -24, duration: 0.32 }, 0)
       .to([".tv__canvas", ".tv__video", ".tv__scan", ".tv__glow"], { opacity: 0, duration: 0.18 }, SWAP)
       .fromTo(".tv__swap", { opacity: 0 }, { opacity: 1, duration: 0.22 }, SWAP)
-      .fromTo(".tv__swap-copy", { opacity: 0, scale: 1.16 }, { opacity: 1, scale: 1, duration: 0.34, ease: "power2.out" }, SWAP + 0.04);
+      .fromTo(".tv__reveal", { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 0.34, ease: "power2.out" }, SWAP + 0.04);
 
     // play screen whenever the section is in view but not yet zoomed past SWAP
     screen && screen.play();

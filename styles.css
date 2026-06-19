@@ -365,9 +365,12 @@ main, .site-footer { position: relative; z-index: 1; }
 .tv__swap-grid { position: absolute; inset: -2px; opacity: .35;
   background-image: linear-gradient(rgba(255,122,69,.25) 1px, transparent 1px), linear-gradient(90deg, rgba(255,122,69,.25) 1px, transparent 1px);
   background-size: 38px 38px; mask-image: radial-gradient(70% 70% at 50% 50%, #000, transparent); }
-.tv__swap-copy { position: relative; text-align: center; padding: 0 24px; }
-.tv__swap-copy h3 { font-size: clamp(1.8rem, 6vw, 4rem); font-weight: 800; letter-spacing: -.04em; color: #fff; margin: 8px 0 12px; }
-.tv__swap-copy p { color: rgba(255,255,255,.75); font-family: var(--mono); font-size: .9rem; }
+/* reveal overlay — sits over the pin, NOT inside the scaling TV, so it stays readable */
+.tv__reveal { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px; text-align: center;
+  opacity: 0; pointer-events: none; padding: 0 24px; }
+.tv__reveal h3 { font-size: clamp(2.2rem, 7vw, 5rem); font-weight: 800; letter-spacing: -.04em; color: #fff; margin: 8px 0 12px; }
+.tv__reveal p { color: rgba(255,255,255,.8); font-family: var(--mono); font-size: clamp(.85rem, 1.4vw, 1rem); }
 .tv__down { display: inline-block; color: #ff7a45; animation: bob 1.4s ease-in-out infinite; }
 @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 .tv__bezel { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 0 8px; }

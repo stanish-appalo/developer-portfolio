@@ -364,16 +364,16 @@
             <div class="tv__scan" aria-hidden="true"></div>
             <div class="tv__glow" aria-hidden="true"></div>
             <!-- HD reveal that takes over as you zoom in -->
-            <div class="tv__swap" aria-hidden="true">
-              <span class="tv__swap-grid"></span>
-              <div class="tv__swap-copy">
-                <span class="eyebrow" style="color:#ff7a45;justify-content:center">Now entering</span>
-                <h3>The Design Lab</h3>
-                <p>Six wildly different sites. One developer. <span class="tv__down">↓</span></p>
-              </div>
-            </div>
+            <div class="tv__swap" aria-hidden="true"><span class="tv__swap-grid"></span></div>
           </div>
           <div class="tv__bezel" aria-hidden="true"><span class="tv__brand">STANISH·VISION</span><span class="tv__led"></span></div>
+        </div>
+
+        <!-- reveal text lives OUTSIDE the scaling TV so it stays a sane size -->
+        <div class="tv__reveal" aria-hidden="true">
+          <span class="eyebrow" style="color:#ff7a45;justify-content:center">Now entering</span>
+          <h3>The Design Lab</h3>
+          <p>Six wildly different sites. One developer. <span class="tv__down">↓</span></p>
         </div>
 
         <p class="tv__cap" data-tv-lead>Not just clean &amp; correct — I can make it <span class="ital">move.</span></p>
